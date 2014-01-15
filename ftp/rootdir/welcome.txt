@@ -1,0 +1,15 @@
+Welcome to our FTP server. This file appears in the server's root directory.
+
+What to try:
+   -Firefox
+   -Filezilla
+   -FTP
+   -Netcat
+
+
+Please behave yourselves:
+   - Do not store any copyrighted or illegal material on this server.
+
+
+Thanks,
+The group 3 team
