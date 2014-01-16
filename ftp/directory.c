@@ -2,7 +2,7 @@
  * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * Course: CMPT-361
  * Assignment #3 - ftp server
- * Files: dir_cmd.c
+ * Files: directory.c
  * Date: November 2013
  * 
  * Description:

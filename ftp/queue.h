@@ -9,30 +9,30 @@
  *   Functions to support building a queue of commands, stored as strings,
  *   first in first out.
  *****************************************************************************/
-
 #ifndef __QUEUE_H__
 #define __QUEUE_H__
 
 
-
+//TODO replace arbitrary values and consolidate.
 typedef struct node {
-	char cmd[4096];
-	struct node *next;
+  char cmd[4096];
+  struct node *next;
 } queue;
+
 
 /******************************************************************************
  * Adds a command to the end of the queue.
  *
  * Arguments:
- *   commandstr - null terminated string holding command and parameter
- *   *cmd_queu_ptr - head of the queue
+ *      commandstr - null terminated string holding command and parameter.
+ *   *cmd_queu_ptr - head of the queue.
  *
  * Returns
- * 	head of the queue
+ * 	head of the queue.
  *
  * Original author: Justin Slind
  *****************************************************************************/
-queue* addToQueue(char *commandstr, queue *cmd_queue_ptr);
+queue* addToQueue (char *commandstr, queue *cmd_queue_ptr);
 
 
 /******************************************************************************
@@ -43,12 +43,12 @@ queue* addToQueue(char *commandstr, queue *cmd_queue_ptr);
  *   cmd_queu_ptr - head the queue
  *
  * Returns
- * 	returns 0 when function is complete
+ * 	returns 0 when function is complete - Wrong
  *
  * Original author: Justin Slind
  *****************************************************************************/
+queue* pullFromQueue (char *commandstr, queue *cmd_queue_ptr);
 
-queue* pullFromQueue(char *commandstr, queue *cmd_queue_ptr);
 
 /******************************************************************************
  * frees allocated memory in the queue
@@ -61,9 +61,7 @@ queue* pullFromQueue(char *commandstr, queue *cmd_queue_ptr);
  *
  * Original author: Justin Slind
  *****************************************************************************/
-
-void freeQueue(queue *cmd_queue_ptr);
-
+void freeQueue (queue *cmd_queue_ptr);
 
 
 #endif //__QUEUE_H__

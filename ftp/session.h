@@ -13,13 +13,16 @@
 #ifndef __SESSION_H__
 #define __SESSION_H__
 
+
 #include <stdbool.h>
 #include "queue.h"
+
 
 //TODO update these random, arbitrary values.
 #define CMD_STRLEN 4096
 #define USER_STRLEN 64
 #define ABORT_STRLEN 5
+
 
 /******************************************************************************
  * Timeout values for the control thread and command thread.
@@ -111,5 +114,6 @@ int session (int c_sfd);
  * Checked by: Evan Myers 
  *****************************************************************************/
 int readCmd (char *str, int sock, session_info_t *si);
+
 
 #endif //__SESSION_H__
