@@ -18,10 +18,15 @@
  * then passed to this function. The command will be checked for validity, and
  * passed to the appropriate function to perform the desired task.
  *
+ * This function will always be called as the function pointer argument to
+ * pthread_create(). Therefore, the 'void *' return value and parameter should
+ * not be altered without thought.
+ *
  * Arguments:
  *   param - The command received from the client on the control connection.
  *
  * Original author: James Yoo
+ * Edited by: Evan Myers
  *****************************************************************************/
 void *command_switch (void *param);
 

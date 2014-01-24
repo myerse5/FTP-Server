@@ -17,10 +17,14 @@
 #include "session.h"
 
 
+#define MAX_NUM_ARGS 1
+
+
 /******************************************************************************
  * cmd_type - see "misc.h"
  *****************************************************************************/
-void cmd_type (session_info_t *si, char *arg) {
+void cmd_type (session_info_t *si, char *arg)
+{
   char *ascii = "200 Switching to ASCII mode.\n";
   char *fail = "504 Command not implemented for that parameter.\n";
 
@@ -72,7 +76,8 @@ void cmd_type (session_info_t *si, char *arg) {
 /******************************************************************************
  * cmd_mode - see "misc.h"
  *****************************************************************************/
-void cmd_mode (session_info_t *si, char *arg) {
+void cmd_mode (session_info_t *si, char *arg)
+{
   char *ascii = "200 Switching to stream mode.\n";
   char *fail = "504 Command not implemented for that parameter.\n";
 
@@ -95,7 +100,8 @@ void cmd_mode (session_info_t *si, char *arg) {
 /******************************************************************************
  * cmd_syst - see "misc.h"
  *****************************************************************************/
-void cmd_syst (session_info_t *si) {
+void cmd_syst (session_info_t *si)
+{
   char *system = "215 UNIX Type: L8\n";
 
   send_all(si->c_sfd, (uint8_t *)system, strlen(system));
@@ -107,21 +113,33 @@ void cmd_syst (session_info_t *si) {
  *****************************************************************************/
 void cmd_stru (session_info_t *si, char *arg, int argCount)
 {
-
-  char *fileStructure = "200 - Switching to File Structure.\n",
-    *argUnrecognized = "501 - Syntax error in parameters; incorrect number of parameters.\n",
-    *argUnimplemented = "504 - Command is not implemented for that parameter.\n";
+  char *reply;
 
   if ((argCount > MAX_NUM_ARGS) || (arg == NULL)) {
-    send_all(si->c_sfd, (uint8_t *)argUnrecognized, strlen(argUnrecognized));
+    reply = "200 - Switching to File Structure.\n";
+    send_all (si->c_sfd, (uint8_t *)reply, strlen (reply));
     return;
   }
 
   if (strcmp(arg, "F") == 0) {
-    send_all(si->c_sfd, (uint8_t *)fileStructure, strlen(fileStructure));
+    reply = "501 - Syntax error in parameters";
+    send_all (si->c_sfd, (uint8_t *)reply, strlen (reply));
     return;
   } else {
-    send_all(si->c_sfd, (uint8_t *)argUnimplemented, strlen(argUnimplemented));
+    reply = "504 - Command is not implemented for that parameter.\n";
+    send_all (si->c_sfd, (uint8_t *)reply, strlen (reply));
     return;
   }
+}
+
+
+/******************************************************************************
+ * cmd_quit - see "cmd_quit.h"
+ *****************************************************************************/
+void cmd_quit (session_info_t *si)
+{
+  char *reply = "221 - Quitting system; goodbye.\n";
+
+  send_all (si->c_sfd, (uint8_t *)reply, strlen (reply));
+  si->cmd_quit = true;
 }

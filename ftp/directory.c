@@ -102,7 +102,8 @@ void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
  * Original Author: Alex Tai
  * Rewritten by: Evan Myers
  *****************************************************************************/
-static void listDirect (session_info_t *si, char * fullpath, bool detail) {
+static void listDirect (session_info_t *si, char * fullpath, bool detail)
+{
   DIR *dp;                       //directory pointer
   struct dirent *ep;             //entry pointer
   char *output;                  //output buffer
@@ -209,7 +210,8 @@ static void listDirect (session_info_t *si, char * fullpath, bool detail) {
  * Original Author: Alex Tai
  * Rewritten by: Evan Myers
  *****************************************************************************/
-static int detailList (struct dirent *dirInfo, char *fullpath, char **output) {
+static int detailList (struct dirent *dirInfo, char *fullpath, char **output)
+{
   //cmtime() requires 26 characters. We will use less characters in our string.
   char time[26];  
   struct stat fileStat;
@@ -270,7 +272,8 @@ static int detailList (struct dirent *dirInfo, char *fullpath, char **output) {
 /******************************************************************************
  * makeDir - see "directory.h"
  *****************************************************************************/
-void makeDir (session_info_t *si, char * filepath) {
+void makeDir (session_info_t *si, char * filepath)
+{
   mode_t permissions = 0;
   //Sets permission for the new folder being created.
   permissions = permissions | S_IRUSR;
@@ -401,4 +404,18 @@ void cmd_cwd (session_info_t *si, char *arg)
   free (fullpath);
   free (canon);
   return;
+}
+
+
+/******************************************************************************
+ * cmd_pwd - see "directory.h"
+ *****************************************************************************/
+void cmd_pwd (session_info_t *si)
+{
+  char *printStart = "257 - \"",
+       *printEnd = "\".\n";
+  
+  send_all(si->c_sfd, (uint8_t *)printStart, strlen(printStart));
+  send_all(si->c_sfd, (uint8_t *)si->cwd, strlen(si->cwd));
+  send_all(si->c_sfd, (uint8_t *)printEnd, strlen(printEnd));
 }

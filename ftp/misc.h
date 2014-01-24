@@ -12,9 +12,8 @@
 #ifndef __MISC_H__
 #define __MISC_H__
 
-#include "session.h"
 
-#define MAX_NUM_ARGS 1
+#include "session.h" //Required for session_info_t in function parameters.
 
 
 /******************************************************************************
@@ -26,7 +25,8 @@
  *
  * Original author: Justin Slind
  *****************************************************************************/
-void cmd_type(session_info_t *si, char *arg);
+void cmd_type (session_info_t *si, char *arg);
+
 
 /******************************************************************************
  * Changes Mode. Only valid mode is stream.
@@ -36,7 +36,8 @@ void cmd_type(session_info_t *si, char *arg);
  *
  * Original author: Justin Slind
  *****************************************************************************/
-void cmd_mode(session_info_t *si, char *arg);
+void cmd_mode (session_info_t *si, char *arg);
+
 
 /******************************************************************************
  * Send the system type on the control connection.
@@ -60,6 +61,7 @@ void cmd_mode(session_info_t *si, char *arg);
  *****************************************************************************/
 void cmd_syst (session_info_t *si);
 
+
 /******************************************************************************
  * Set the file transfer structure.
  *
@@ -70,6 +72,17 @@ void cmd_syst (session_info_t *si);
  * Original author: James Yoo
  *****************************************************************************/
 void cmd_stru (session_info_t *si, char *arg, int argCount);
+
+
+/******************************************************************************
+ * Quit the current session.
+ *
+ * Arguments:
+ *   si - The control thread session information.
+ *
+ * Original author: James Yoo
+ *****************************************************************************/
+void cmd_quit (session_info_t *si);
 
 
 #endif //__MISC_H__

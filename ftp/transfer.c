@@ -35,34 +35,42 @@ static void store (session_info_t *si, char *cmd, char *purp);
 /******************************************************************************
  * cmd_stou - see "cmd_stor.h"
  *****************************************************************************/
-void cmd_stou (session_info_t *si, char *arg) {
-  //if client is anonymous or they haven't logged in, they don't
-  //have permission to run this command
+void cmd_stou (session_info_t *si, char *arg)
+{
+  int rt;
+  char *reply;
+  char tempname[256];
+  char *fullPath;
+
+  //The user must be logged in on, and must not be anonymous.
   if (si->logged_in == false || strcmp(si->user,"anonymous") == 0) {
-    char *permdeny = "550 Permission denied.\n";
-    send_all(si->c_sfd,(uint8_t*)permdeny,strlen(permdeny));
-    close(si->d_sfd);
+    reply = "550 Permission denied.\n";
+    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+    close (si->d_sfd);
     si->d_sfd = 0;
     return;
   }
 
-  //RFC 959 does not require or expect parameter for STOU cmd.
-  //This implementation ignores parameter to allow
-  //modern ftp clients to work with STOU.
-  srand(time(NULL));
-  char tempname[256];
-  char *fullPath = NULL;
-  int rt;
+  /* RFC 959 does not require or expect parameter for STOU cmd. Future updates
+   * to the server will allow the user to recommend a filename. */
+  srand (time (NULL));
   do {
     if (fullPath)
-      free(fullPath);
-    sprintf(tempname,"%d",rand());
-    fullPath = merge_paths(si->cwd,tempname,NULL);
-    rt = access(fullPath, F_OK);
-  } while ((rt != -1));          //verify that random name doesn't exist
-  free(fullPath);
-  store(si,tempname,"w");
-  
+      free (fullPath);
+    sprintf (tempname, "%d", rand());
+    fullPath = merge_paths (si->cwd, tempname, NULL);
+    /* F_OK tests if a file exists. The file must not exist (-1) to store the
+     * file with a unique name. */
+    if ((rt = access (fullPath, F_OK)) == -1) {
+      if (errno == ENOENT)
+	continue;
+      else
+	return;
+    }
+  } while (rt != -1);
+
+  free (fullPath);
+  store (si,tempname,"w");
   return;
 }
 
@@ -70,11 +78,12 @@ void cmd_stou (session_info_t *si, char *arg) {
 /******************************************************************************
  * cmd_stor - see "transfer.h"
  *****************************************************************************/
-void cmd_stor(session_info_t *si, char *cmd) {
+void cmd_stor (session_info_t *si, char *cmd)
+{
   if (perm_neg_check (si, cmd) == -1)
     return;
   
-  store(si,cmd,"w");
+  store (si, cmd, "w");
   return;
 }
 
@@ -82,7 +91,8 @@ void cmd_stor(session_info_t *si, char *cmd) {
 /******************************************************************************
  * cmd_appe - see "transfer.h"
  *****************************************************************************/
-void cmd_appe (session_info_t *si, char *cmd) {
+void cmd_appe (session_info_t *si, char *cmd)
+{
   if (perm_neg_check (si, cmd) == -1)
     return;
   
@@ -107,38 +117,52 @@ void cmd_appe (session_info_t *si, char *cmd) {
  * Original author: Justin Slind
  * Rewritten by: Evan Myers
  *****************************************************************************/
-static void store (session_info_t *si, char *cmd, char *purp) {
+static void store (session_info_t *si, char *cmd, char *purp)
+{
   struct timeval timeout;
   fd_set rfds;
+  int nfds;
+
   FILE *storfile;
-  int rt = -1;
+  int rv;
   char buffer[BUFFSIZE];
+
+  //Strings used to send reply messages.
+  char *reply;
+  char *type;
+
+  //Used to create the absolute path on the filesystem.
+  char *fullPath;
   
   //send positive prelimitary reply
-  char *transferstart = "150 Opening ";
-  char *middle = " mode data connection for ";
-  char *type;
-  send_all(si->c_sfd,(uint8_t*)transferstart,strlen(transferstart));
+  reply = "150 Opening ";
+  send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+ 
   if (si->type == 'a')
     type = "ASCII";
   else
     type = "BINARY";
   send_all(si->c_sfd,(uint8_t*)type,strlen(type));
-  send_all(si->c_sfd,(uint8_t*)middle,strlen(middle));
-  send_all(si->c_sfd,(uint8_t*)cmd,strlen(cmd));
-  char *endln = ".\n";
-  send_all(si->c_sfd,(uint8_t*)endln,strlen(endln));
+
+  reply = " mode data connection for ";
+  send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+
+  send_all (si->c_sfd, (uint8_t*)cmd, strlen (cmd));
+
+  reply = ".\n";
+  send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
   
-  //data connection must already exist
+  /* Data connection must already exist. Note: In the future, if the PORT
+   * command was specified previously to this command, the data connection
+   * will be established at this point. */
   if (si->d_sfd == 0) {
-    char *nodata = "425 Use PORT or PASV first.\n";
-    send_all(si->c_sfd,(uint8_t*)nodata,strlen(nodata));
+    reply = "425 Use PORT or PASV first.\n";
+    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
     return;
   }
   
   /* Merge all pathname fragments to create a single pathname to use with
    * fopen(). */
-  char *fullPath;
   if ((fullPath = merge_paths(si->cwd, cmd, NULL)) == NULL) {
     cleanup_stor_recv (si, NULL, 451);
     return;
@@ -151,13 +175,14 @@ static void store (session_info_t *si, char *cmd, char *purp) {
   }
   free(fullPath);
   
-  while(si->cmd_abort == false && rt != 0) {
-    FD_ZERO(&rfds);
-    FD_SET(si->d_sfd,&rfds);
+  rv = -1;
+  while ((si->cmd_abort == false) && (rv != 0)) {
+    FD_ZERO (&rfds);
+    FD_SET (si->d_sfd, &rfds);
     timeout.tv_sec = COM_THREAD_ABORT_TIMEOUT_SEC;
     timeout.tv_usec = COM_THREAD_ABORT_TIMEOUT_USEC;
-    int sr = 0;
-    if ((sr = select(si->d_sfd+1,&rfds,NULL,NULL,&timeout)) == -1) {
+
+    if ((nfds = select(si->d_sfd + 1, &rfds, NULL, NULL, &timeout)) == -1) {
       if (errno == EINTR)
 	continue;
       fprintf (stderr, "%s: select: %s\n", __FUNCTION__, strerror (errno));
@@ -165,27 +190,27 @@ static void store (session_info_t *si, char *cmd, char *purp) {
       return;
     }
     //check for timeout.
-    if (sr == 0)
+    if (nfds == 0)
       continue;
     
     //check if data port has rxed data
+    //NOTE: Check for recv errno. Will need to add reply message.
     if (FD_ISSET(si->d_sfd, &rfds)) {
-      if ((rt = recv(si->d_sfd,buffer,BUFFSIZE,0)) > 0) {
-	fwrite(buffer,sizeof(char),rt,storfile);
-      }
+      if ((rv = recv (si->d_sfd,buffer,BUFFSIZE,0)) > 0)
+	fwrite (buffer, sizeof (char), rv, storfile);
     }
   }
   
   if (si->cmd_abort) {
-    char *aborted = "426 Connection closed; transfer aborted.\n";
-    send_all(si->c_sfd,(uint8_t*)aborted,strlen(aborted));
+    reply = "426 Connection closed; transfer aborted.\n";
+    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
     si->cmd_abort = false;
   } else {
-    char *success = "226 Transfer Complete.\n";
-    send_all(si->c_sfd,(uint8_t*)success,strlen(success));
+    reply = "226 Transfer Complete.\n";
+    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
   }
   
-  //close file and data connection
+  //Close the file and the data connection.
   cleanup_stor_recv (si, storfile, 0);
   return;
 }
@@ -194,7 +219,8 @@ static void store (session_info_t *si, char *cmd, char *purp) {
 /******************************************************************************
  * command_retrieve - see "transfer.h"
  *****************************************************************************/
-void command_retrieve (session_info_t *si, char *path) {
+void command_retrieve (session_info_t *si, char *path)
+{
   struct timeval timeout;
   fd_set wfds;
   FILE *retrFile;
@@ -318,7 +344,6 @@ void command_retrieve (session_info_t *si, char *path) {
   }
 
   return;
-
 }
 
 
@@ -388,4 +413,3 @@ void cleanup_stor_recv (session_info_t *si, FILE *fp,  int errcode)
   close (si->d_sfd);
   si->d_sfd = 0;
 }
-

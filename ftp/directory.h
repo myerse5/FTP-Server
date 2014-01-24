@@ -36,6 +36,7 @@
  *****************************************************************************/
 void cmd_list_nlst (session_info_t *si, char *argpath, bool detail);
 
+
 /******************************************************************************
  * Create a directory.
  *
@@ -48,6 +49,7 @@ void cmd_list_nlst (session_info_t *si, char *argpath, bool detail);
  * Checked by: Evan Myers
  *****************************************************************************/
 void makeDir (session_info_t *si, char *filepath);
+
 
 /******************************************************************************
  * Change the current working directory to the parent directory by calling
@@ -62,6 +64,7 @@ void makeDir (session_info_t *si, char *filepath);
  *****************************************************************************/
 void cmd_cdup (session_info_t *si, char *arg);
 
+
 /******************************************************************************
  * Change the current working directory.
  *
@@ -71,7 +74,19 @@ void cmd_cdup (session_info_t *si, char *arg);
  * 
  * Original author: Alex tai
  * Changed by: Evan Myers - using code written by James Yoo and Justin Slind
- ******************************************************************************/
+ *****************************************************************************/
 void cmd_cwd (session_info_t *si, char *arg);
+
+
+/******************************************************************************
+ * Send the current working directory to the client.
+ *
+ * Argument:
+ *   si - The command thread session information.
+ *
+ * Original author: Evan Myers
+ *****************************************************************************/
+void cmd_pwd (session_info_t *si);
+
 
 #endif //__DIRECTORY_H__

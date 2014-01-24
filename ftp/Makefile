@@ -6,7 +6,7 @@
 # Date: November 2013
 ###############################################################################
 CC	=	gcc
-CFLAGS	=	-g -pedantic -pthread -std=c99 -Wall -D_BSD_SOURCE -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE -D_XOPEN_SOURCE=600
+CFLAGS	=	-g -pedantic -pthread -std=c99 -Wall -D_BSD_SOURCE -D_POSIX_C_SOURCE=200112L -D_GNU_SOURCE #-D_XOPEN_SOURCE=600
 LDFLAGS	=	-pthread
 
 

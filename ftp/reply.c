@@ -17,6 +17,7 @@
 #include "net.h"
 #include "reply.h"
 
+
 /* A response message sent over the control connection should fit on a
  * standard, default terminal line. */
 #define STD_TERM_SZ 80  //The standard number of characters in a terminal line.
