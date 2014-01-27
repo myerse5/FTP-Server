@@ -105,8 +105,8 @@ void cmd_pass (session_info_t *si, char *arg)
     send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
   }
   
-  if (password)
-    free (password);
+  if (pass)
+    free (pass);
   
   return;
 }
