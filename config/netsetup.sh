@@ -26,17 +26,33 @@
 #        the IP address of the router, and will differ from the IP address used
 #        to create the sockets used by the FTP server. All other settings will
 #        be equivelant to the default setup.
+#
+#   reset - The default port is set to 21, and all other network settings are
+#        cleared. Suitable to use when pushing code to a public repository.
 #------------------------------------------------------------------------------
+
 
 #The port argument must be either DEF_PORT, or in the range MIN_PORT-MAX_PORT.
 MAX_PORT=65535
 MIN_PORT=1024
 DEF_PORT=21
 
+#Interface constants.
+LOOPBACK="lo"
+
+
+#------------------------------------------------------------------------------
+#
+#------------------------------------------------------------------------------
+function helpMesg() {
+    echo "use $0 -h for more information"
+}
+
+
 #------------------------------------------------------------------------------
 # Print the usage message to standard out.
 #------------------------------------------------------------------------------
-function usage() {
+function usageMesg() {
     echo "usage: $0 [-i interface] [-p port] mode"
 
     echo -ne "\nmode:"
@@ -55,8 +71,8 @@ function usage() {
 # if present.
 #------------------------------------------------------------------------------
 function loSetup() {
-    sed -i '/INTERFACE_CONFIG/c\INTERFACE_CONFIG lo' ftp.conf
-    sed -i '/NAT_GLOBAL_IP/c\NAT_GLOBAL_IP' ftp.conf
+    sed -i "/INTERFACE_CONFIG/c\INTERFACE_CONFIG $LOOPBACK" ftp.conf
+    sed -i "/NAT_GLOBAL_IP /c\NAT_GLOBAL_IP " ftp.conf
 }
 
 
@@ -68,7 +84,7 @@ function loSetup() {
 function defaultSetup() {
     for iface in $@; do
 	#Skip the loopback interface.
-	if $(echo $iface | grep "lo"); then
+	if [[ "$iface" == "$LOOPBACK" ]]; then
 	    continue
 	fi
 	
@@ -87,15 +103,17 @@ function defaultSetup() {
 
     if [[ -z "$match" ]] && [[ -n "$userIface" ]]; then
 	echo "Error: Interface '$userIface' does not exist" >&2
+	helpMesg
 	exit 1
     elif [[ -z "$match" ]] && [[ -z "userIface" ]]; then
-	echo "Error: No interfaces found. Try using mode 'lo'"
+	echo "Error: No interfaces found. Try using mode 'loopback'"
+	helpMesg
 	exit 1
     fi
 	
     #Update the interface in the config file, remove any NAT IP values.
     sed -i "/INTERFACE_CONFIG/c\INTERFACE_CONFIG $match" ftp.conf
-    sed -i '/NAT_GLOBAL_IP/c\NAT_GLOBAL_IP' ftp.conf	
+    sed -i "/NAT_GLOBAL_IP/c\NAT_GLOBAL_IP" ftp.conf	
 }
 
 
@@ -113,7 +131,7 @@ function natSetup() {
 
 
 #Acknowledgement: http://wiki.bash-hackers.org/howto/getopts_tutorial
-while getopts ":i:p:" opt; do
+while getopts ":i:p:h" opt; do
     case $opt in
 	p)
 	    port=$OPTARG
@@ -123,42 +141,53 @@ while getopts ":i:p:" opt; do
 	    userIface="$OPTARG"
 	    shift $((OPTIND-1))
 	    ;;
+	h)
+	    usageMesg
+	    exit 0
+	    ;;
 	\?)
 	    echo "Error: Invalid option: -$OPTARG" >&2
-	    usage
+	    helpMesg
 	    exit 1
 	    ;;
 	:)
 	    echo "Error: Option -$OPTARG requires an argument." >&2
-	    usage
+	    helpMesg
 	    exit 1
 	    ;;
     esac
     shift $((OPTIND-1))
 done
 
-if [[ -z "$userIface" ]] && [[ "$userIface" == "lo" ]]; then
-    echo "Error: Interface 'lo' may only be used as a mode"
-    usage
+if [[ -n "$userIface" ]] && [[ "$userIface" == "$LOOPBACK" ]]; then
+    echo "Error: Interface '$LOOPBACK' may only be used as a mode"
+    helpMesg
+    exit 1
 fi
 
 #Check the script argument count (that are left after the options). 
 if [[ $# -lt 1 ]]; then
-    usage
+    echo "Error: No mode selected"
+    helpMesg
     exit 1
 fi
 
 #Collect all available interface names.
 interfaces=$(ifconfig | grep -B2 "inet addr" | awk '{print $1}' |\
-         grep -v -e 'inet\|--')
+             grep -v -e 'inet\|--')
 
 #Redirect according to script argument.
-if [[ "$1" == "lo" ]]; then
+if [[ "$1" == "loopback" ]]; then
     loSetup
 elif [[ "$1" == "default" ]]; then
-    defaultSetup $userIface $interfaces
+    defaultSetup $interfaces
 elif [[ "$1" == "nat" ]]; then
-    natSetup $userIface $interfaces
+    natSetup $interfaces
+elif [[ "$1" == "clear" ]]; then
+    sed -i "/INTERFACE_CONFIG/c\INTERFACE_CONFIG " ftp.conf
+    sed -i "/NAT_GLOBAL_IP/c\NAT_GLOBAL_IP" ftp.conf
+    sed -i "/DEFAULT_PORT_CONFIG/c\DEFAULT_PORT_CONFIG $DEF_PORT" ftp.conf
+    exit 0
 fi
 
 #Set the default port if the option was selected.
@@ -166,17 +195,22 @@ if [[ -n "$port" ]]; then
     (($port+0)) >/dev/null
     if [[ $? -ne 0 ]]; then
 	echo "Error: Port argument must be a posotive integer"
-	usage
+	helpMesg
 	exit 1
     fi
 
     if [[ $port -gt $MAX_PORT ]]; then
 	echo "Error: Port must be $DEF_PORT or in range $MIN_PORT-$MAX_PORT" >&2
+	helpMesg
 	exit 1
     elif [[ $port -lt $MIN_PORT ]] && [[ $port -ne $DEF_PORT ]]; then
 	echo "Error: Port must be $DEF_PORT or in range $MIN_PORT-$MAX_PORT" >&2
+	helpMesg
 	exit 1
     fi
 
     sed -i "/DEFAULT_PORT_CONFIG/c\DEFAULT_PORT_CONFIG $port" ftp.conf
+else
+    sed -i "/DEFAULT_PORT_CONFIG/c\DEFAULT_PORT_CONFIG $DEF_PORT" ftp.conf
 fi
+    
