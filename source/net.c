@@ -425,7 +425,7 @@ static int get_pasv_sock (const char *address, const char *port)
     return -1;
   }
 
-  /* Bind to socket to a port. The port is chosen by the operating system
+  /* Bind the socket to a port. The port is chosen by the operating system
    * with the call to bind() because "0" was passed to the getaddrinfo()
    * service argument. */
   if (bind (sfd, result->ai_addr, result->ai_addrlen) == -1) {
