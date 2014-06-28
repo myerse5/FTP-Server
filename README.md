@@ -16,15 +16,15 @@ How To Install
 
 Directory Contents
 ------------------
-FTP-Server/config - Configuration files for the server, and scripts to aid in
-		    the configuration settings.
+	FTP-Server/config - Configuration files for the server, and scripts to aid in
+						the configuration settings.
 
-FTP-Server/rootdir - The default root directory of the server. This is the top
-		     level directory that all users connected to the server can
-		     access. This directory can be changed in the file
-		     "FTP-Server/config/ftp.conf".
+	FTP-Server/rootdir - The default root directory of the server. This is the top
+						 level directory that all users connected to the server can
+						 access. This directory can be changed in the file
+						 "FTP-Server/config/ftp.conf".
 
-FTP-Server/source - The sourcecode used to create the server executable.
+	FTP-Server/source - The sourcecode used to create the server executable.
 
 
 Authors
