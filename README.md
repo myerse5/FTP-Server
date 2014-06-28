@@ -30,5 +30,5 @@ Directory Contents
 
 Authors
 -------
-The server is now being improved/maintained by Evan Myers, previous 
+The server is now being improved/maintained by Evan Myers. Previous 
 contributors may be found in the corresponding source files.
