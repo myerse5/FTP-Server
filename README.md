@@ -24,7 +24,6 @@ Directory Contents
 						 access. This directory can be changed in the file
 						 "FTP-Server/config/ftp.conf".
 
-
 	FTP-Server/source - The source code used to create the server executable.
 
 
