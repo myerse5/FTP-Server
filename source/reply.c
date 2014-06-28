@@ -8,7 +8,7 @@
  * Description: 
  *    The functions found in this file send a response message to the client
  *    over the control connection socket. They were created to remove
- *    repitition in places where a response message is sent. Also, this will
+ *    repetition in places where a response message is sent. Also, this will
  *    help ensure that all messages that are meant to send the same data will
  *    do so.
  *****************************************************************************/
@@ -51,7 +51,7 @@ int send_mesg_227 (int c_sfd, int d_sfd)
   int mesg_len;
 
   /* Used to collect the the decimal value of each byte, which will be sent to
-   * the client as specified rfc 959. */
+   * the client as specified RFC 959. */
   int h1, h2, h3, h4;         //The bytes of the IPv4 address
   int p1, p2;                 //The bytes of the port
 
@@ -74,7 +74,7 @@ int send_mesg_227 (int c_sfd, int d_sfd)
    * on all systems by converting to network-byte-order before calculating
    * the value of each byte field. */
   my_addr.sin_addr.s_addr = htonl (my_addr.sin_addr.s_addr);
-  /* Store each byte of the IPv4 address as a decimal value in preperation for
+  /* Store each byte of the IPv4 address as a decimal value in preparation for
    * sending the passive mode message. */
   h1 = (my_addr.sin_addr.s_addr & 0xFF000000) >> (3 * BITS_IN_BYTE);
   h2 = (my_addr.sin_addr.s_addr & 0x00FF0000) >> (2 * BITS_IN_BYTE);
@@ -85,7 +85,7 @@ int send_mesg_227 (int c_sfd, int d_sfd)
    * on all systems by converting to network-byte-order before calculating
    * the value of each byte field. */
   my_addr.sin_port = htons (my_addr.sin_port);
-  /* Store each byte of the port as a decimal value in preperation for
+  /* Store each byte of the port as a decimal value in preparation for
    * sending the passive mode message. */
   p1 = (my_addr.sin_port & 0xFF00) >> BITS_IN_BYTE;
   p2 = (my_addr.sin_port & 0x00FF);

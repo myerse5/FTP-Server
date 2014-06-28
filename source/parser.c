@@ -140,7 +140,7 @@ char *strdup(const char *string)
  * convert_to_upper - see "parser.h"
  *****************************************************************************/
 void convert_to_upper(char *string)
-{ //BEGIN function 'conver_to_upper'
+{ //BEGIN function 'convert_to_upper'
 
   for (int i = 0; i < strlen(string); i++) {
     string[i] = toupper(string[i]);

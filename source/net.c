@@ -7,7 +7,7 @@
  *
  * Description:
  *   The functions found in this file create, connect, or accept sockets or
- *   socket connections. Functions that send or recieve data from a socket are
+ *   socket connections. Functions that send or receive data from a socket are
  *   also found in this file. The PASV and PORT commands, which create and/or
  *   connect a socket to establish a data connection are found in this file.
  *
@@ -49,7 +49,7 @@
  * (6 three digit fields) + (5 commas) + (null terminator) */
 #define MAX_PORT_STR_LEN ((6*3) + 5 + 1)
 
-/* The minimum string length of a PORT command (includeing the arguments).
+/* The minimum string length of a PORT command (including the arguments).
  * (PORT + space) + (6 one digit fields) + (5 commas) + (newline + null) */
 #define MIN_PORT_STR_LEN ((6*1) + 5 + 1)
 
@@ -157,7 +157,7 @@ int accept_connection (int listen_sfd, int mode, session_info_t *si)
     }
 
 
-    /* There is no timeout. select() will block indefinately a client is
+    /* There is no timeout. select() will block indefinitely a client is
      * attempting to create a control connection, or a command is entered
      * on the server console. */
     timeout_ptr = NULL;
@@ -179,7 +179,7 @@ int accept_connection (int listen_sfd, int mode, session_info_t *si)
     if (mode == ACCEPT_CONTROL)
       FD_SET (stdin_fd, &rfds);
 
-    /* Set this value inside the loop to make linux systems operate the same as
+    /* Set this value inside the loop to make Linux systems operate the same as
      * "most others". See 'man (2) select' for more information about the
      * timeout value. */
     if (mode == ACCEPT_PASV) {
@@ -276,7 +276,7 @@ int cmd_pasv (session_info_t *session)
 
   /* The server "MUST" close the data connection port when:
    * "The port specification is changed by a command from the user".
-   * Source: rfc 959 page 19 */
+   * Source: RFC 959 page 19 */
   if (session->d_sfd > 0) {
     if (close (session->d_sfd) == -1)
       fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
@@ -470,7 +470,7 @@ int cmd_port (session_info_t *session, char *cmd_str)
 
   /* The server "MUST" close the data connection port when: 
    * "The port specification is changed by a command from the user".
-   * Source: rfc 959 page 19 */
+   * Source: RFC 959 page 19 */
   if (session->d_sfd > 0) {
     if (close (session->d_sfd) == -1)
       fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
@@ -509,14 +509,14 @@ int cmd_port (session_info_t *session, char *cmd_str)
 
 
 /******************************************************************************
- * Convert the argument recieved with the PORT command to a hostname and
+ * Convert the argument received with the PORT command to a hostname and
  * service string that can be used as arguments to getaddrinfo(). 
  *
  * The port command is entered as: PORT h1,h2,h3,h4,p1,p2 where h1-h4 are the
  * decimal values of each byte in the hostname and p1-p2 are the high and low
  * order bytes of the 16bit integer port.
  *
- * The argument 'cmd_str' is the command recieved by the server on the control
+ * The argument 'cmd_str' is the command received by the server on the control
  * connection. The command string must be passed to this function in its
  * entirety.
  *
@@ -530,7 +530,7 @@ int cmd_port (session_info_t *session, char *cmd_str)
  *    cmd_str - The string of the port command. "PORT h1,h2,h3,h4,p1,p2\n"
  *
  * Return values:
- *   0    The hostname and service strings have been successfuly set.
+ *   0    The hostname and service strings have been successfully set.
  *  -1    Error, hostname and service strings are not set.
  *
  * Original author: Evan Myers
@@ -585,7 +585,7 @@ int get_port_address (int c_sfd,
 	fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
 	send_mesg_501 (c_sfd);
       } else if (h_index < 6) {
-	//Only a comma may seperate each byte field.
+	//Only a comma may separate each byte field.
 	if (cmd_str[i] != ',') {
 	  fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
 	  send_mesg_501 (c_sfd);
@@ -665,7 +665,7 @@ int get_port_address (int c_sfd,
   
 
 /******************************************************************************
- * Connect to the address and port specified in the arguments recieved with the
+ * Connect to the address and port specified in the arguments received with the
  * PORT command.
  *
  * Arguments:

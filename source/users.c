@@ -128,7 +128,7 @@ static void getMD5 (char *user, char *pass, char *md5str)
 {
   /* TODO fix the buffer overruns in this block. Username could be greater than
    * 500 characters, password could be longer than 500 characters, both
-   * combined may definately be longer than 500 characters. */
+   * combined may definitely be longer than 500 characters. */
   char data[500];
   byte_t md5checksum[16];
   struct md5CTX md5struct;

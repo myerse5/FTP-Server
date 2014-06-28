@@ -102,10 +102,10 @@ void cmd_appe (session_info_t *si, char *cmd)
 
 
 /******************************************************************************
- * Stores or appends a file to the servers filesystem, which action is
+ * Stores or appends a file to the servers file system, which action is
  * performed is determined by the 'purp' argument.
  *
- * Note: The purp argument characters are equivelant to the second argument to
+ * Note: The purp argument characters are equivalent to the second argument to
  *       fopen(). See the fopen() manpage for a full list of options. Read
  *       options should not be passed to this function.
  *
@@ -131,10 +131,10 @@ static void store (session_info_t *si, char *cmd, char *purp)
   char *reply;
   char *type;
 
-  //Used to create the absolute path on the filesystem.
+  //Used to create the absolute path on the file system.
   char *fullPath;
   
-  //send positive prelimitary reply
+  //send positive preliminary reply
   reply = "150 Opening ";
   send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
  
@@ -375,7 +375,7 @@ static int perm_neg_check (session_info_t *si, char *arg)
   }
   
   //Determine if the pathname argument should be accepted.
-  if ((pathCheck = check_futer_file(si->cwd, arg, false)) == -1) {
+  if ((pathCheck = check_future_file(si->cwd, arg, false)) == -1) {
     cleanup_stor_recv (si, NULL, 450);
     return -1;
   } else if (pathCheck == -2) {
@@ -396,7 +396,7 @@ static int perm_neg_check (session_info_t *si, char *arg)
 void cleanup_stor_recv (session_info_t *si, FILE *fp,  int errcode)
 {
   /* Send the appropriate reply to the client on the control connection when
-   * an error has occured. */
+   * an error has occurred. */
   if (errcode == 451) {
     send_mesg_451 (si->c_sfd);
   } else if (errcode == 553) {

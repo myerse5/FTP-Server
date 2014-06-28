@@ -24,7 +24,7 @@ FTP-Server/rootdir - The default root directory of the server. This is the top
 		     access. This directory can be changed in the file
 		     "FTP-Server/config/ftp.conf".
 
-FTP-Server/source - The sourcecode used to create the server executable.
+FTP-Server/source - The source code used to create the server executable.
 
 
 Authors

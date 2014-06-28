@@ -17,13 +17,13 @@
  *   was to ensure that the pathname argument is a descendant of our servers
  *   chosen root directory.
  *
- *   When researching realpath() and PATH_MAX I determined that at this point
+ *   When researching realpath() and PATH_MAX we determined that at this point
  *   in time realpath() is not safe or not portable.
  *
  *   We created a function to canonicalize a pathname, but struggled to resolve
  *   symbolic links.
  *
- *   While researching a solution to resolve symbolic links, I found this
+ *   While researching a solution to resolve symbolic links, we found this
  *   webpage:
  *   http://www.gnu.org/software/libc/manual/html_node/Symbolic-Links.html
  *
@@ -107,9 +107,9 @@ bool check_dir_exist (const char *cwd, char *argpath)
 
 
 /******************************************************************************
- * check_futer_file - see path.h
+ * check_future_file - see path.h
  *****************************************************************************/
-int check_futer_file (const char *cwd, char *argpath, bool unique)
+int check_future_file (const char *cwd, char *argpath, bool unique)
 {
   char *fullpath;
   char *trimmed;
@@ -177,7 +177,7 @@ char *merge_paths (const char *cwd, char *argpath, const int *reserve)
   /* This block of code removes ' ' (space) characters from a path argument.
    * These spaces appear in arguments sent by a web browser. Due to time
    * constraints, we have not been able to determine if this is expected
-   * behavior. This solution will remove the ability to work with files 
+   * behaviour. This solution will remove the ability to work with files 
    * (including directories) that have space characters in their filename. If
    * we had more development time this would not be the case. */
   if (argpath != NULL) {
@@ -312,7 +312,7 @@ static char *merge_absolute (const char *argpath, const int *reserve)
  * this comparison is made.
  *
  * Arguments:
- *   fullpath - The full pathname to the argument. May include symbollic links,
+ *   fullpath - The full pathname to the argument. May include symbolic links,
  *              "..", etc.
  *
  *   trimmed  - The full pathname provided in the first argument may have been
@@ -345,7 +345,7 @@ static char *merge_absolute (const char *argpath, const int *reserve)
  *****************************************************************************/
 static bool within_rootdir (char *fullpath, const char *trimmed)
 {
-  char *canon;       //An abreviation of canonicalized absolute pathname.
+  char *canon;       //An abbreviation of canonicalized absolute pathname.
   char *str;         //Return value of strcat function.
 
   //Resolve all "..", ".", and duplicate '/' entries. Resolve symbolic links.
@@ -412,17 +412,18 @@ bool is_a_dir (const char *fullpath)
 
 
 /******************************************************************************
- * Seperate a filename from the file path.
+ * Separate a filename from the file path.
  *
  * Arguments:
  *  argpath - The filename argument received with a client command. Remove the
- *            filename from all prefix componenets of the path.
+ *            filename from all prefix components of the path.
  *  reserve - Set the number of characters removed from the first argument in
  *            this argument on function return.
  *
  * Return values:
  *  NULL - error, or no filename was trimmed.
- *  
+ *
+ * Original author: Evan Myers
  *****************************************************************************/
 static char *trim_arg_path (char **argpath, int *reserve)
 {
@@ -460,9 +461,9 @@ static char *trim_arg_path (char **argpath, int *reserve)
     return NULL;
   }
 
-  /* Copy the string and emove the filename from the prefix path. This
+  /* Copy the string and remove the filename from the prefix path. This
    * operation will replace a trailing filename with a null character so that
-   * futer string functions only recognize the prefix.
+   * future string functions only recognize the prefix.
    * eg. "prefix/trail" becomes "prefix/" */
   strncpy (trim_filen, str, *reserve);
   *str = '\0';
@@ -507,7 +508,7 @@ static void restore_trimmed (char **argpath, char **fullpath, char *trimmed)
  * Original author: Evan Myers
  *
  * Note: Special care must be taken when modifying this function. The function
- *       only returns 0 (a posotive response) when the call to stat() fails
+ *       only returns 0 (a positive response) when the call to stat() fails
  *       because the file does not exist.
  *****************************************************************************/
 static int is_unique (const char *fullpath)
@@ -522,7 +523,7 @@ static int is_unique (const char *fullpath)
       return -1;
     }
   } else {
-    fprintf (stderr, "%s: stat: FUTER_UNIQ file exists\n", __FUNCTION__);
+    fprintf (stderr, "%s: stat: FUTURE_UNIQ file exists\n", __FUNCTION__);
     return -2;
   }
 }

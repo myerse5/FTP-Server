@@ -7,7 +7,7 @@
  *
  * Description:
  *    The server begins and ends here. When a control connection is established
- *    with a client, control of all futer interactions between the server and
+ *    with a client, control of all future interactions between the server and
  *    this client is passed to the function control_thread() as a pthread.
  *
  * Acknowledgements:
@@ -47,7 +47,7 @@
  *****************************************************************************/
 /* One control thread is created for every control connection made with a 
  * client. This counter is modified by main(), and all control threads, so it
- * has been protected from multiple read/writes occuring at the same time by a
+ * has been protected from multiple read/writes occurring at the same time by a
  *  mutex. */
 pthread_mutex_t ctrl_count_mutex = PTHREAD_MUTEX_INITIALIZER;
 int active_control_threads = 0;
@@ -75,7 +75,7 @@ int shutdown_server = false;
  *          structure that is created for each control connection.
  *
  *   -When a client command requires a full pathname, such as when storing or
- *    retreiving a file, the cwd of the session is appended to the global root
+ *    retrieving a file, the cwd of the session is appended to the global root
  *    directory.
  *
  *   -Before appending the session cwd to the root cwd, any relative directory
@@ -84,6 +84,40 @@ int shutdown_server = false;
  *    command is not accepted. */
 char *rootdir;
 
+/******************************************************************************
+ * Locations that need to grab info from the config file. TODO.
+ *   - main.c, main(), [rootdir]
+ *   - net.c, get_control_sock(), [port, iface]
+ *   - net.c, get_interface_address() -> move to global IP address variable.
+ *     (do this only once while/directly after reading config file).
+ *   - net.c, cmd_pasv(), [iface]
+ *   - 
+ *****************************************************************************/
+
+/******************************************************************************
+ * Clean up weird strings and whatnot. TODO
+ *     FILE --- FUNCTION ---- First offending variable declaration.
+ *    - net.c, cmd_port(), char *portsuccess.
+ *    - directory.c, makeDir(), char * printStart.
+ *    - help.c, command_help(), int strLength. ENDIF comments
+ *    - transfer.c, perm_neg_check(), char * permdeny.
+ *****************************************************************************/
+
+/******************************************************************************
+ * Other TODO's:
+ *   - Spellcheck each file. Currently spellchecked: [path.c/h, config.c/h,
+ *     ctrlthread.c/h, directory.c/h, help.c/h, main.c, Makefile, misc.c/h,
+ *     net.c/h, parser.c/h, path.c/h, queue.c/h, reply.c/h, servercmd.c/h,
+ *     session.c/h, switch.c/h, transfer.c/h, users.c/h
+ *
+ *     config/: user.conf, ftp.conf, netsetup.sh, guinetsetup.pl, 
+ *
+ *   - Return an error for when [net.c] send_all() fails. Handle this error.
+ *   - Test/check the includes in "directory.h". errno.h, stdlib.h, stdio.h... 
+ *   - Find errors which the server can recover from, currently most failures
+ *     result in the server shutting down. Admittedly most of these errors are
+ *     pretty fatal, but this should be looked into.
+ *****************************************************************************/
 
 /******************************************************************************
  * main
@@ -93,10 +127,10 @@ char *rootdir;
  *****************************************************************************/
 int main (int argc, char *argv[])
 {
-  int listen_sfd;      //Listen for control connections on this sfd.
-  int *c_sfd;          //An accepted control connection sfd.
-  pthread_t thread;    //The handle for a new thread.
-  pthread_attr_t attr; //pthread attribute, to set detached state on creation.
+  int listen_sfd;       // Listen for control connections on this sfd.
+  int *c_sfd;           // An accepted control connection sfd.
+  pthread_t thread;     // The handle for a new thread.
+  pthread_attr_t attr;  // pthread attribute, to set detached state on creation.
   
   char *root_temp;
 

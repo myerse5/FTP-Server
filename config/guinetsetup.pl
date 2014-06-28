@@ -79,7 +79,7 @@ sub port_toggled
 
 ###############################################################################
 # Whenever the entry in the "Port Selection" frame is changed, determine if the
-# entry is a posotive integer. If it is not a posotive integer, display the
+# entry is a positive integer. If it is not a positive integer, display the
 # error message below the previously mentioned entry widget. Callback.
 ###############################################################################
 sub port_error
@@ -255,7 +255,7 @@ sub create_iface_frame
     $frameTable->attach_defaults ($label, 0, 1, 2, 3);
     $label->set_alignment (0, 0.5);
     $label->set_line_wrap (TRUE);
-    # Required for a visually appealing linewrap.
+    # Required for a visually appealing line wrap.
     $label->set_size_request (405, -1);
     $label->show;
 
@@ -294,7 +294,7 @@ sub create_iface_frame
     $radioBtn->signal_connect (toggled => \&iface_radio_toggle,
 			       [$label, $mesg[2], $comboBox, $localModel]);
 
-    # Determines if the user wants the script to autoconfigure, or if the user
+    # Determines if the user wants the script to auto configure, or if the user
     # wants to choose a specific interface.
     $checkBtn = Gtk2::CheckButton->new ("Let me choose the interface");
     $radioTable->attach ($checkBtn, 0, 1, 3, 4, 'fill', 'fill', 20, 0);
@@ -346,7 +346,7 @@ sub create_port_frame
 
     $radioBtn->signal_connect (toggled => \&port_toggled, $entry);
 
-    $label = Gtk2::Label->new ("Error: Port must be a posotive integer");
+    $label = Gtk2::Label->new ("Error: Port must be a positive integer");
     $table->attach ($label, 0, 1, 3, 4, 'fill', 'shrink', 8, 8);
     $label->set_alignment (0, 0.5);
 

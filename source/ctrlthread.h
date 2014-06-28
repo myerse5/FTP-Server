@@ -30,6 +30,15 @@ extern pthread_mutex_t ctrl_count_mutex;//Number of control connection threads.
 
 
 /******************************************************************************
+ * When main() accepts a new connection, a pthread is started with this
+ * this wrapper function. A welcome message is sent to the user, and a new
+ * session is began by calling the function session(). When the session has
+ * been terminated, control is passed back to this function where all remaining
+ * heap memory is freed, and the control socket closed.
+ *
+ * Arguments:
+ *    arg - The control socket file descriptor.
+ * 
  * Original author: Justin Slind
  * Updated by: Evan Myers
  *****************************************************************************/
@@ -40,11 +49,11 @@ void *control_thread (void * arg);
  * Increase or decrease the number of active control connection threads.This
  * function uses a mutex to lock the count before retrieving the value. This
  * will ensure two threads do not try to modify the variable at the same time,
- * whith results being undefined.
+ * with results being undefined.
  *
  * Arguments:
  *  value - This function will treat this argument as either zero, negative,
- *          or posotive. It will modify the count by 0, -1, or +1 respectively.
+ *          or positive. It will modify the count by 0, -1, or +1 respectively.
  *
  * Return values:
  *   0    Success

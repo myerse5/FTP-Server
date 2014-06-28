@@ -33,7 +33,7 @@ int command_help (session_info_t *si, char *arg)
 
   if (arg == NULL) {
 
-    const char *row1 = "The following commands may be abbreviated\nThe available commands are:\n",
+    const char *row1 = "The following commands may be abbreviated.\nThe available commands are:\n",
                *row2 = "\tABOR\tHELP\tPASV\tRMD\tSTOU\n",
                *row3 = "\tACCT\tLIST\tPORT\tRNFR\tSTRU\n",
                *row4 = "\tALLO\tMKD\tPWD\tRNTO\tSYST\n",

@@ -8,7 +8,7 @@
  * Description:
  *    The functions found in this file send a response message to the client
  *    over the control connection socket. They were created to remove
- *    repitition in places where a response message is sent. Also, this will
+ *    repetition in places where a response message is sent. Also, this will
  *    help ensure that all messages that are meant to send the same data will
  *    do so.
  *****************************************************************************/
@@ -25,7 +25,7 @@
  *           message will be sent to this socket.
  *
  * Return values:
- *    0   The message was successfuly sent to the socket.
+ *    0   The message was successfully sent to the socket.
  *   -1   The entire message was not sent to the socket.
  *
  * Original author: Evan Myers
@@ -34,8 +34,8 @@ int send_welcome_mesg_220 (int c_sfd);
 
 
 /******************************************************************************
- * This function generates a posotive response message for the PASV command
- * as specified in 'rfc 959'.
+ * This function generates a positive response message for the PASV command
+ * as specified in 'RFC 959'.
  *
  * Create the PASV command response message, then send the feedback to the
  * client on the control connection. The response will be sent in the following
@@ -53,7 +53,7 @@ int send_welcome_mesg_220 (int c_sfd);
  *           with this socket.
  *
  * Return values:
- *    0   The message was successfuly sent to the socket.
+ *    0   The message was successfully sent to the socket.
  *   -1   The entire message was not sent to the socket.
  *
  * Original author: Evan Myers
@@ -69,7 +69,7 @@ int send_mesg_227 (int c_sfd, int d_sfd);
  *           message will be sent to this socket.
  *
  * Return values:
- *    0   The message was successfuly sent to the socket.
+ *    0   The message was successfully sent to the socket.
  *   -1   The entire message was not sent to the socket.
  *
  * Original author: Evan Myers
@@ -84,7 +84,7 @@ int send_mesg_450 (int c_sfd);
  *           message will be sent to this socket.
  *
  * Return values:
- *    0   The message was successfuly sent to the socket.
+ *    0   The message was successfully sent to the socket.
  *   -1   The entire message was not sent to the socket.
  *
  * Original author: Evan Myers
@@ -101,7 +101,7 @@ int send_mesg_451 (int c_sfd);
  *           message will be sent to this socket.
  *
  * Return values:
- *   0    The message was successfuly sent to the socket.
+ *   0    The message was successfully sent to the socket.
  *  -1    The entire message was not sent to the socket.
  *
  * Original author: Evan Myers
@@ -118,7 +118,7 @@ int send_mesg_500 (int c_sfd);
  *           message will be sent to this socket.
  *
  * Return values:
- *   0    The message was successfuly sent to the socket.
+ *   0    The message was successfully sent to the socket.
  *  -1    The entire message was not sent to the socket.
  *
  * Original author: Evan Myers
@@ -136,7 +136,7 @@ int send_mesg_501 (int c_sfd);
  *           message will be sent to this socket.
  *
  * Return values:
- *   0    The message was successfuly sent to the socket.
+ *   0    The message was successfully sent to the socket.
  *  -1    The entire message was not sent to the socket.
  *
  * Original author: Evan Myers
@@ -153,7 +153,7 @@ int send_mesg_530 (int c_sfd);
  *           message will be sent to this socket.
  *
  * Return values:
- *   0    The message was successfuly sent to the socket.
+ *   0    The message was successfully sent to the socket.
  *  -1    The entire message was not sent to the socket.
  *
  * Original author: Evan Myers
@@ -170,7 +170,7 @@ int send_mesg_550 (int c_sfd);
  *           message will be sent to this socket.
  *
  * Return values:
- *   0    The message was successfuly sent to the socket.
+ *   0    The message was successfully sent to the socket.
  *  -1    The entire message was not sent to the socket.
  *
  * Original author: Evan Myers

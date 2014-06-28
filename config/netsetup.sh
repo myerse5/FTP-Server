@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #------------------------------------------------------------------------------
-# File: netsetup.sh
 # Date: January, 2014
 # Author: Evan Myers
 #
@@ -25,7 +24,7 @@
 #        will not be used for any other purpose. This address will likely be
 #        the IP address of the router, and will differ from the IP address used
 #        to create the sockets used by the FTP server. All other settings will
-#        be equivelant to the default setup.
+#        be equivalent to the default setup.
 #
 #   reset - The default port is set to 21, and all other network settings are
 #        cleared. Suitable to use when pushing code to a public repository.
@@ -118,7 +117,7 @@ function defaultSetup() {
 
 
 #------------------------------------------------------------------------------
-# Equivelant to the default setup, but also retrieves the public IPv4
+# Equivalent to the default setup, but also retrieves the public IPv4
 # address to be displayed on the server console.
 #
 # This setup should only be called when the server has a NAT router as the
@@ -194,7 +193,7 @@ fi
 if [[ -n "$port" ]]; then
     (($port+0)) >/dev/null
     if [[ $? -ne 0 ]]; then
-	echo "Error: Port argument must be a posotive integer"
+	echo "Error: Port argument must be a positive integer"
 	helpMesg
 	exit 1
     fi

@@ -7,7 +7,7 @@
  *
  * Description:
  *   The functions found in this file create, connect, or accept sockets or
- *   socket connections. Functions that send or recieve data from a socket are
+ *   socket connections. Functions that send or receive data from a socket are
  *   also found in this file. The PASV and PORT commands, which create and/or
  *   connect a socket to establish a data connection are found in this file.
  ******************************************************************************/
@@ -67,7 +67,7 @@ int get_control_sock (void);
  *    ACCEPT_CONTROL - 
  *        In this mode, standard input from the terminal that running the
  *        server will be added to the select() read set. By monitoring stdin,
- *        the function main() can idle in this function indefinately while
+ *        the function main() can idle in this function indefinitely while
  *        the server is running, until a new client wishes to connect to the
  *        server, or a server command is entered.
  *
@@ -159,7 +159,7 @@ int cmd_pasv (session_info_t *session);
  * Original author: Evan Myers
  *
  * Acknowledgements:
- *   Evan - This function was created as the result of advice recieved from
+ *   Evan - This function was created as the result of advice received from
  *   Dr. Nicholas Boers to retrieve the external IP address of a computer. With
  *   this advice, the link which follows was suggested. When creating this
  *   function, I was following the example code found in this link:
@@ -195,7 +195,7 @@ int cmd_port (session_info_t *session, char *cmd_str);
  *   sfd - The socket file descriptor to send the message to.
  *
  * Return values:
- *   0    The full message was successfuly sent.
+ *   0    The full message was successfully sent.
  *  -1    Error, the message was not sent in full.
  *
  * Original author: Evan Myers

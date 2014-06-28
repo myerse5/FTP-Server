@@ -39,7 +39,7 @@ queue* addToQueue (char *commandstr, queue *cmd_queue_ptr);
  * Pulls a command from the front of the queue.
  *
  * Arguments:
- *   commandstr - null termianted string holding command and parameter
+ *   commandstr - null terminated string holding command and parameter
  *   cmd_queu_ptr - head the queue
  *
  * Returns

@@ -96,7 +96,7 @@ char *get_config_path (const char *filen)
   filen_sz = strlen (filen);
   path_sz = strlen (path);
   /* We will replace the null character for the pathname with a directory
-   * seperator '/', and must null-terminate the string. Therefore, we will
+   * separator '/', and must null-terminate the string. Therefore, we will
    * add one to each value returned from strlen() as strlen() does not include
    * the null terminator. */
   abs_path_sz = (filen_sz + 1) + (path_sz + 1);
@@ -109,7 +109,7 @@ char *get_config_path (const char *filen)
   }
 
   /* Replace the null character appearing after the path with a directory
-   * seperator '/'. Then append the filename. */
+   * separator '/'. Then append the filename. */
   path[path_sz] = '/';
   //Append the filename to the current working directory path.
   strncpy ((path + path_sz + 1), filen, (filen_sz + 1));
@@ -189,7 +189,7 @@ static char *search_config (const char *target, const char *pathname)
     return NULL;
   }
 
-  //Do not include the space character seperating the target setting and value.
+  //Do not include the space character separating the target setting and value.
   line_ptr++;
   //Find the length of the value for the target setting.
   val_length = strlen (line_ptr);

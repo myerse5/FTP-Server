@@ -18,7 +18,7 @@
 
 /******************************************************************************
  * Determine if a file exists. All components of the pathname must be present
- * on the filesystem. This function also checks that the pathname is for a file
+ * on the file system. This function also checks that the pathname is for a file
  * that is either found in the server root directory, or is a descendant of the
  * server root directory.
  *
@@ -39,7 +39,7 @@ bool check_file_exist (const char *cwd, char *argpath);
 
 /******************************************************************************
  * Determine if a directory exists. All components of the pathname must be
- * present on the filesystem. All prefix components of the pathname must be
+ * present on the file system. All prefix components of the pathname must be
  * directories.
  * 
  * This function also checks that the pathname is for a file that is either
@@ -65,7 +65,7 @@ bool check_dir_exist (const char *cwd, char *argpath);
 
 /******************************************************************************
  * Determine if a file may be created with the given pathname. All components
- * of the pathname must be present on the filesystem. All prefix components of
+ * of the pathname must be present on the file system. All prefix components of
  * the pathname must be directories.
  *
  * This function also checks that the pathname is for a file that is either
@@ -92,7 +92,7 @@ bool check_dir_exist (const char *cwd, char *argpath);
  *
  * note: argpath is not meant to be "const char *argpath"
  *****************************************************************************/
-int check_futer_file (const char *cwd, char *argpath, bool unique);
+int check_future_file (const char *cwd, char *argpath, bool unique);
 
 
 /******************************************************************************
@@ -125,7 +125,7 @@ int check_futer_file (const char *cwd, char *argpath, bool unique);
  *            (eg. the STOR command), it is necessary to remove the filename
  *            that does not yet exist from the filepath before calling the
  *            function canonicalize_file_name(). In this case, the argpath
- *            string may be "trimmed" of the non-existant file before calling
+ *            string may be "trimmed" of the non-existent file before calling
  *            this function. The string returned by this function will contain
  *            "reserve" amount of indexes so the trimmed file may later be
  *            re-attached to the pathname.

@@ -17,7 +17,7 @@
 
 
 /******************************************************************************
- * Stores a file with a unquie filename.  Ignores parameter.
+ * Stores a file with a unique filename.  Ignores parameter.
  *
  * Arguments:
  *    si - info for current session
@@ -25,7 +25,7 @@
  *
  * Note: This function will store the unique name to the current working
  *       directory and not any other path argument. This is intended, we were
- *       following "rfc 959".
+ *       following "RFC 959".
  *
  * Original author: Justin Slind
  * Checked by: Evan Myers
@@ -33,7 +33,7 @@
 void cmd_stou (session_info_t *si, char *arg);
 
 /******************************************************************************
- * Stores a file on the server filesystem.
+ * Stores a file on the server file system.
  *
  * Arguments:
  *    si - Info for current session.
@@ -45,7 +45,7 @@ void cmd_stou (session_info_t *si, char *arg);
 void cmd_stor (session_info_t *si, char *cmd);
 
 /******************************************************************************
- * Appends a file to another file found on the server filesystem.
+ * Appends a file to another file found on the server file system.
  *
  * Arguments:
  *    si - info for current session
@@ -57,7 +57,7 @@ void cmd_stor (session_info_t *si, char *cmd);
 void cmd_appe(session_info_t *si, char *cmd);
 
 /******************************************************************************
- * Retrieve a file from the server filesystem.
+ * Retrieve a file from the server file system.
  *
  * Arguments:
  *     si - The session information.
@@ -80,7 +80,7 @@ void command_retrieve(session_info_t *si, char *path);
  *   fp - the open filestream, set this to NULL if no filestream has been
  *        opened.
  *   errcode - The type of error. This should be set to zero if no error
- *             occured.
+ *             occurred.
  *
  * Original author: Evan Myers
  *****************************************************************************/

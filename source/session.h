@@ -93,7 +93,6 @@ typedef struct {
  *   -1   error
  *
  * Original author: Justin Slind
- * Checked by: Evan Myers
  *****************************************************************************/
 int session (int c_sfd);
 
@@ -111,7 +110,6 @@ int session (int c_sfd);
  *   -1   error
  *
  * Original author: Justin Slind
- * Checked by: Evan Myers 
  *****************************************************************************/
 int readCmd (char *str, int sock, session_info_t *si);
 

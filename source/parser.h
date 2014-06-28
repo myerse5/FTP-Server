@@ -38,7 +38,7 @@ char *command_extract_cmd(const char *cmdString);
 
 
 /******************************************************************************
- * An achronym for the function name. No documentation. very bad combination.
+ * An acronym for the function name. No documentation. very bad combination.
  *
  * Original author: James Yoo
  *****************************************************************************/
@@ -54,7 +54,7 @@ void convert_to_upper(char *string);
 
 
 /******************************************************************************
- * Probably trims whitespace. No documentation.
+ * Probably trims white space. No documentation.
  *
  * Original author: James Yoo
  *
