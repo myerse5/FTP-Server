@@ -14,7 +14,7 @@
 #include "md5.h"
 #include "net.h"
 #include "session.h"
-#include "users.h"
+#include "user.h"
 
 
 //Local function prototypes.

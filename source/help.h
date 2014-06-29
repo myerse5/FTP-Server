@@ -27,7 +27,7 @@
  *
  * Original author: James Yoo
  *****************************************************************************/
-int command_help (session_info_t *si, char *arg);
+void cmd_help (session_info_t *si, char *arg);
 
 
 #endif  //__HELP_H__

@@ -39,6 +39,51 @@ int send_welcome_mesg_220 (int c_sfd)
 }
 
 /******************************************************************************
+ * send_mesg_214_general - see reply.h
+ *****************************************************************************/
+void send_mesg_214_general (int csfd)
+{
+  const char *helpMsgStart = "\n214 - Help message.\n",
+    *row1 = "The following commands may be abbreviated.\n"
+            "The available commands are:\n",
+    *row2 = "\tABOR\tHELP\tPASV\tRMD\tSTOU\n",
+    *row3 = "\tACCT\tLIST\tPORT\tRNFR\tSTRU\n",
+    *row4 = "\tALLO\tMKD\tPWD\tRNTO\tSYST\n",
+    *row5 = "\tAPPE\tMODE\tQUIT\tSITE\tTYPE\n",
+    *row6 = "\tCDUP\tNLST\tREIN\tSMNT\tUSER\n",
+    *row7 = "\tCWD\tNOOP\tREST\tSTAT\n",
+    *row8 = "\tDELE\tPASS\tRETR\tSTOR\n",
+    *helpMsgEnd = "214 - Help is OK.\n\n";
+
+    send_all (csfd, (uint8_t *)helpMsgStart, strlen (helpMsgStart));
+    send_all (csfd, (uint8_t *)row1, strlen (row1));
+    send_all (csfd, (uint8_t *)row2, strlen (row2));
+    send_all (csfd, (uint8_t *)row3, strlen (row3));
+    send_all (csfd, (uint8_t *)row4, strlen (row4));
+    send_all (csfd, (uint8_t *)row5, strlen (row5));
+    send_all (csfd, (uint8_t *)row6, strlen (row6));
+    send_all (csfd, (uint8_t *)row7, strlen (row7));
+    send_all (csfd, (uint8_t *)row8, strlen (row8));
+    send_all (csfd, (uint8_t *)helpMsgEnd, strlen (helpMsgEnd));
+}
+
+
+/******************************************************************************
+ * send_mesg_214_specific - see reply.h
+ *****************************************************************************/
+void send_mesg_214_specific (int csfd, char *syntax, char *info)
+{
+  const char *helpMesgEnd = "214 - Help is OK.\n\n";
+  const char *helpMesgStart = "\n214 - Help message.\n";
+
+  send_all (csfd, (uint8_t *)helpMesgStart, strlen (helpMesgStart));
+  send_all (csfd, (uint8_t *)syntax, strlen (syntax));
+  send_all (csfd, (uint8_t *)info, strlen (info));
+  send_all (csfd, (uint8_t *)helpMesgEnd, strlen (helpMesgEnd));
+}
+
+
+/******************************************************************************
  * send_mesg_227 - see "reply.h"
  *****************************************************************************/
 int send_mesg_227 (int csfd, int dsfd)

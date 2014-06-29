@@ -21,7 +21,7 @@
 #include "directory.h"
 #include "net.h"
 #include "session.h"
-#include "users.h"
+#include "user.h"
 
 
 //Preprocessor Macro Define(s)
@@ -126,7 +126,7 @@ void *command_switch (void *param) {
 	  convert_to_upper (arg);
 	}
 
-	command_help (si, arg);
+	cmd_help (si, arg);
 
 	//NOOP <CRLF>
       } else if (strcmp (cmd, "NOOP") == 0) {

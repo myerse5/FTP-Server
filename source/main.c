@@ -176,9 +176,8 @@ int main (int argc, char *argv[])
    *    -The functions pthread_mutex_lock or pthread_mutex_unlock return error.
    *    -The command "shutdown" is entered on the server console. */ 
   while (1) {
-    if ((csfd = malloc (sizeof (*csfd))) == NULL) {
-      fprintf (stderr, "%s: malloc: could not allocate the required space\n",
-	       __FUNCTION__);
+    if ((csfd = malloc (sizeof(*csfd))) == NULL) {
+      fprintf (stderr, "%s: malloc: could not allocate the required space\n", __FUNCTION__);
       break;
     }
 

@@ -35,6 +35,23 @@ int send_welcome_mesg_220 (int csfd);
 
 
 /******************************************************************************
+ * Send a help message that lists all implemented commands on the server.
+ *****************************************************************************/
+void send_mesg_214_general (int csfd);
+
+
+/******************************************************************************
+ * Send a help message that describes the syntax and purpose of a command.
+ *
+ * Arguments:
+ *     csfd - The control socket file descriptor to send the message to.
+ *   syntax - Usage instructions for the requested command.
+ *     info - An explanation for what the command does.
+ *****************************************************************************/
+void send_mesg_214_specific (int csfd, char *syntax, char *info);
+
+
+/******************************************************************************
  * This function generates a positive response message for the PASV command
  * as specified in 'RFC 959'.
  *
@@ -66,6 +83,7 @@ int send_mesg_227 (int csfd, int dsfd);
  * A permanent negative response. Action not taken because file is unavailable.
  *****************************************************************************/
 int send_mesg_450 (int csfd);
+
 
 /******************************************************************************
  * A negative response sent when there was an error in processing.

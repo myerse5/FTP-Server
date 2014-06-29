@@ -6,8 +6,8 @@
  * Description:
  *   Functions to deal with users logging into the server.
  *****************************************************************************/
-#ifndef __USERS_H__
-#define __USERS_H__
+#ifndef __USER_H__
+#define __USER_H__
 
 
 /******************************************************************************
@@ -40,4 +40,4 @@ void cmd_user (session_info_t *si, char *arg);
 void cmd_pass (session_info_t *si, char *cmd);
 
 
-#endif //__USERS_H__
+#endif //__USER_H__

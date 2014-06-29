@@ -9,7 +9,7 @@ LDFLAGS	=	-pthread
 
 
 #main program
-ftpd: 	config.o ctrlthread.o directory.o help.o main.o md5.o misc.o net.o parser.o path.o queue.o reply.o servercmd.o session.o switch.o transfer.o users.o
+ftpd: 	config.o ctrlthread.o directory.o help.o main.o md5.o misc.o net.o parser.o path.o queue.o reply.o servercmd.o session.o switch.o transfer.o user.o
 	$(CC) $(LDFLAGS) -o ftpd $^
 
 
@@ -42,14 +42,14 @@ servercmd.o:	servercmd.c config.h ctrlthread.h net.h servercmd.h
 
 session.o:	session.c net.h session.h switch.h queue.h
 
-switch.o: 	switch.c directory.h help.h misc.h net.h parser.h session.h switch.h transfer.h users.h
+switch.o: 	switch.c directory.h help.h misc.h net.h parser.h session.h switch.h transfer.h user.h
 
 transfer.o: 	transfer.c net.h path.h reply.h session.h transfer.h
 
-users.o:	users.c config.h md5.h net.h session.h users.h
+user.o:	user.c config.h md5.h net.h session.h user.h
 
 
 #Clean up the repository.
 .PHONY:	clean
 clean:
-	$(RM) ftpd config.o ctrlthread.o directory.o help.o main.o md5.o misc.o net.o parser.o path.o queue.o reply.o servercmd.o session.o switch.o transfer.o users.o
+	$(RM) ftpd config.o ctrlthread.o directory.o help.o main.o md5.o misc.o net.o parser.o path.o queue.o reply.o servercmd.o session.o switch.o transfer.o user.o
