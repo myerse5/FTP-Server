@@ -1,8 +1,6 @@
 /******************************************************************************
- * Student: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment: Assignment #3 - ftp server
- * File: net.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -38,7 +36,7 @@
 #define ACCEPT_PASV    2    //Accept a connection on a PASV socket.
 
 //See "Other return values" in the accept_connection() function header.
-#define STDIN_READY    -999
+#define STDIN_READY -999
 
 
 /******************************************************************************
@@ -87,19 +85,19 @@ int get_control_sock (void);
  *        thread.
  *
  * Arguments:
- *  listen_sfd - Accept a connection with this socket.
+ *    sfd - Accept a connection with this socket.
  *
- *        mode - Modify the actions performed by this function. See modes above.
+ *   mode - Modify the actions performed by this function. See modes above.
  *
- *        si   - A pointer to the session information. If a command thread is
- *               running this function, the variable cmd_quit will be 
- *               checked periodically while accepting a connection. If the
- *               thread creator wishes the thread to terminate, the thread
- *               creator will modify this value.
+ *     si - A pointer to the session information. If a command thread is
+ *          running this function, the variable cmd_quit will be checked
+ *          periodically while accepting a connection. If the thread creator
+ *          wishes the thread to terminate, the thread creator will modify
+ *          this value.
  *
- *               When the function caller is not a command thread, NULL should
- *               be passed in this argument. It will not be checked if mode
- *               was set appropriately.
+ *          When the function caller is not a command thread, NULL should  be
+ *          passed in this argument. It will not be checked if mode was set
+ *          appropriately.
  *
  * Return values:
  *   >0   The socket file descriptor of the newly created control connection.
@@ -157,14 +155,6 @@ int cmd_pasv (session_info_t *session);
  *  -1    Error, the address has not been set in the second argument. 
  *
  * Original author: Evan Myers
- *
- * Acknowledgements:
- *   Evan - This function was created as the result of advice received from
- *   Dr. Nicholas Boers to retrieve the external IP address of a computer. With
- *   this advice, the link which follows was suggested. When creating this
- *   function, I was following the example code found in this link:
- *   
- *   http://stackoverflow.com/a/265978
  *****************************************************************************/
 int get_interface_address (const char *interface,
 			   char (*address)[INET_ADDRSTRLEN]);
@@ -176,7 +166,7 @@ int get_interface_address (const char *interface,
  *
  * Arguments:
  *   session  - A pointer to the session information.
- *   cmd_str  - The string of the port command. "PORT h1,h2,h3,h4,p1,p2\n"
+ *   cmdStr  - The string of the port command. "PORT h1,h2,h3,h4,p1,p2\n"
  *
  * Return values:
  *   >0   The socket file descriptor of the data connection socket.
@@ -184,7 +174,7 @@ int get_interface_address (const char *interface,
  *
  * Original author: Evan Myers
  *****************************************************************************/
-int cmd_port (session_info_t *session, char *cmd_str);
+int cmd_port (session_info_t *session, char *cmdStr);
 
 
 /******************************************************************************
@@ -192,7 +182,9 @@ int cmd_port (session_info_t *session, char *cmd_str);
  * in the first argument. This function was created to handle partial sends.
  *
  * Arguments:
- *   sfd - The socket file descriptor to send the message to.
+ *    sfd - The socket file descriptor to send the message to.
+ *   mesg - The message to send.
+ * toSend - The size of the message.
  *
  * Return values:
  *   0    The full message was successfully sent.
@@ -200,7 +192,7 @@ int cmd_port (session_info_t *session, char *cmd_str);
  *
  * Original author: Evan Myers
  *****************************************************************************/
-int send_all (int sfd, uint8_t *mesg, int mesg_len);
+int send_all (int sfd, uint8_t *mesg, int toSend);
 
 
 #endif //__NET_H__

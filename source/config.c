@@ -1,17 +1,11 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: config.c
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
  *   Functions that work with the server configuration file, ftp.conf, are
  *   found in this file.
- *
- * Acknowledgements:
- *   Evan - The decision to include the configuration file was made after a
- *          conversation with Dr. Nicholas Boers.
  *****************************************************************************/
 #include <errno.h>
 #include <stdio.h>
@@ -34,54 +28,35 @@ static char *search_config (const char *target, const char *pathname);
 /******************************************************************************
  * get_config_value - see config.h
  *****************************************************************************/
-char *get_config_value (const char *config_setting, const char *filen)
+char *get_config_value (const char *configSetting, const char *filen)
 {
-  char *config_path = NULL;
-  char *result_value;
+  char *configPath = NULL;
+  char *resultValue;
 
   //Get the filename path to the configuration file.
-  if ((config_path = get_config_path (filen)) == NULL) {
+  if ((configPath = get_config_path (filen)) == NULL) {
     return NULL;
   }
 
   //Retrieve the value of the setting from the configuration file.
-  if ((result_value = search_config ((const char *)config_setting,
-				     (const char *)config_path)) == NULL) {
-    free (config_path);
+  if ((resultValue = search_config ((const char *)configSetting,
+				    (const char *)configPath)) == NULL) {
+    free (configPath);
     return NULL;
   }
 
   //Free all memory no longer required, return the found value.
-  free (config_path);
-  return result_value;
+  free (configPath);
+  return resultValue;
 }
 
 
 /******************************************************************************
- * Get the absolute pathname for the configuration file of the server. The
- * first argument passed to this function will be set to this value on function
- * return.
- *
- * The caller function must be sure to free the memory returned by this
- * function.
- *
- * Arguments:
- *   filen - return the full pathname for this configuration file.
- *
- * Returns:
- *   A pointer to the absolute pathname string. If NULL is returned, there was
- *   an error, and the pathname could not be determined.
- *
- * Original author: Evan Myers
- *
- * Acknowledgements:
- *   This function is quite similar to the opening portion of Evan's function
- *   'client_file_setup' in the file 'fileop.c' submitted in his second
- *   assignment.
+ * get_config_path - see config.h
  *****************************************************************************/
-char *get_config_path (const char *filen)
+char *get_config_path (const char *filename)
 {
-  int filen_sz, path_sz, abs_path_sz;    //The required string lengths.
+  int filenameSize, pathSize, absPathSize;    //The required string lengths.
   char *path;
 
   //Get the pathname of the current working directory.
@@ -93,16 +68,16 @@ char *get_config_path (const char *filen)
   /* Calculate the size of string required for the absolute pathname of the
    * file being created in this block. Using these values we will realloc()
    * the path, and append the configuration file name. */
-  filen_sz = strlen (filen);
-  path_sz = strlen (path);
+  filenameSize = strlen (filename);
+  pathSize = strlen (path);
   /* We will replace the null character for the pathname with a directory
    * separator '/', and must null-terminate the string. Therefore, we will
    * add one to each value returned from strlen() as strlen() does not include
    * the null terminator. */
-  abs_path_sz = (filen_sz + 1) + (path_sz + 1);
+  absPathSize = (filenameSize + 1) + (pathSize + 1);
 
   //Adjust the size of the pathname to include the filename being created.
-  if ((path = realloc (path, abs_path_sz)) == NULL) {
+  if ((path = realloc (path, absPathSize)) == NULL) {
     fprintf (stderr, "%s: realloc: could not allocate required space\n",
 	     __FUNCTION__);
     return NULL;
@@ -110,9 +85,9 @@ char *get_config_path (const char *filen)
 
   /* Replace the null character appearing after the path with a directory
    * separator '/'. Then append the filename. */
-  path[path_sz] = '/';
+  path[pathSize] = '/';
   //Append the filename to the current working directory path.
-  strncpy ((path + path_sz + 1), filen, (filen_sz + 1));
+  strncpy ((path + pathSize + 1), filename, (filenameSize + 1));
   
   return path;
 }
@@ -143,10 +118,10 @@ static char *search_config (const char *target, const char *pathname)
   FILE *fin;                      //Filepointer for the config file.
  
   char line[MAX_CONFIG_LINE + 1]; //Collect a line from the config file.
-  char *line_ptr;
+  char *linePtr;
 
   char *value;                    //The value of the target setting.
-  int val_length; //The length of the value string for the target setting.
+  int valLength; //The length of the value string for the target setting.
 
   //Open the filestream.
   if ((fin = fopen (pathname, "r")) == NULL) {
@@ -184,28 +159,28 @@ static char *search_config (const char *target, const char *pathname)
   /* The target setting was found in the config file, determine the amount of
    * memory to allocate so that the value of the target setting can be returned
    * to the caller function as a string. */
-  if ((line_ptr = strchr (line, ' ')) == NULL) {
+  if ((linePtr = strchr (line, ' ')) == NULL) {
     fprintf (stderr, "%s: stchr: improper config file format\n", __FUNCTION__);
     return NULL;
   }
 
   //Do not include the space character separating the target setting and value.
-  line_ptr++;
+  linePtr++;
   //Find the length of the value for the target setting.
-  val_length = strlen (line_ptr);
+  valLength = strlen (linePtr);
 
   /* Return error if the value contains no characters. This condition will be
    * true if the last line of the configuration file includes a space but no
    * value for the setting and:
    *    -The last line is the setting being searched for.
    *    -The setting was not found in the file. */
-  if (val_length == 0) {
+  if (valLength == 0) {
     fprintf (stderr, "%s: stchr: improper config file format\n", __FUNCTION__);
     return NULL;
   } 
 
   //Return error if the only character in the value is a newline character.
-  if ((val_length == 1) && (line_ptr[0] == '\n')) {
+  if ((valLength == 1) && (linePtr[0] == '\n')) {
     fprintf (stderr, "%s: stchr: improper config file format\n", __FUNCTION__);
     return NULL;
   }
@@ -213,19 +188,19 @@ static char *search_config (const char *target, const char *pathname)
   /* Remove the newline character at the end of the value if present. The
    * newline character may not be present if the setting was the last line of
    * the file. */
-  if (line_ptr[val_length - 1] == '\n') {
-    line_ptr[val_length - 1] = '\0';
-    val_length--;
+  if (linePtr[valLength - 1] == '\n') {
+    linePtr[valLength - 1] = '\0';
+    valLength--;
   }
 
   //Allocate memory for the value string.
-  if ((value = malloc ((val_length + 1) * sizeof (*value))) == NULL) {
+  if ((value = malloc ((valLength + 1) * sizeof (*value))) == NULL) {
     fprintf (stderr, "%s: malloc: could not allocate the required space\n",
 	     __FUNCTION__);
     return NULL;
   }
   //Copy the value from the target setting line to the target setting value str.
-  strncpy (value, line_ptr, val_length + 1);
+  strncpy (value, linePtr, valLength + 1);
 
   return value;
 }

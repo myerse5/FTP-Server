@@ -1,19 +1,14 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: users.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
  *   Functions to deal with users logging into the server.
  *****************************************************************************/
-
-
 #ifndef __USERS_H__
 #define __USERS_H__
 
-#include "md5.h"
 
 /******************************************************************************
  * Logs the client onto the server with a username in preparation for the PASS

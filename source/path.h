@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: path.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -44,7 +42,7 @@ bool check_file_exist (const char *cwd, char *argpath);
  * 
  * This function also checks that the pathname is for a file that is either
  * found in the server root directory, or is a descendant of the server root
- * directory. 
+ * directory by calling other functions. 
  *
  * The final component to the pathname must be a directory.
  *
@@ -53,7 +51,7 @@ bool check_file_exist (const char *cwd, char *argpath);
  *  argpath - A pathname argument for a client command.
  *
  * Return values:
- *  true - The pathname is valid.
+ *  true  - The pathname is valid.
  *  false - The pathname is not valid.
  *
  * Commands which call this function: NLST, LIST, CWD
@@ -70,7 +68,7 @@ bool check_dir_exist (const char *cwd, char *argpath);
  *
  * This function also checks that the pathname is for a file that is either
  * found in the server root directory, or is a descendant of the server root
- * directory. 
+ * directory by calling other functions. 
  *
  * The final component of the filename must not be a directory.
  *

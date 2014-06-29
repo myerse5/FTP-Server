@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: misc.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -46,18 +44,6 @@ void cmd_mode (session_info_t *si, char *arg);
  *   si - The control thread session information.
  *
  * Original author: Evan Myers
- *
- * Acknowledgements:
- *   http://cr.yp.to/ftp/syst.html
- *
- *   The author states "I recommend that all new servers respond to SYST with
- *   the meaningless string '215 UNIX Type: L8' exactly as used by the majority
- *   of current servers."
- *
- *   I have decided to follow this advice.
- *
- *   Also, ftp.gnu.org sends this message as a reply to the SYST command, and
- *   our server was created for a UNIX system.
  *****************************************************************************/
 void cmd_syst (session_info_t *si);
 

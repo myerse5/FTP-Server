@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: main.c
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -10,17 +8,10 @@
  *    with a client, control of all future interactions between the server and
  *    this client is passed to the function control_thread() as a pthread.
  *
- * Acknowledgements:
- *    Evan - I have included my acknowledgements for working with pthreads in
- *           the file header of "ctrlthread.h" and "ctrlthread.c".
- *
- *    Evan - For debugging response code messages and orders, I have referred
- *           to this webpage:   http://cr.yp.to/ftp.html
- *
  * Compatible programs:
  *     -netcat (nc)
  *     -ftp program
- *     -filezilla
+ *     -Filezilla
  *     -web browser - tested with "Firefox 25.0: Mozilla Firefox for Ubuntu
  *                    canonical - 1.0"
  *     -others which have not been tested.
@@ -49,8 +40,8 @@
  * client. This counter is modified by main(), and all control threads, so it
  * has been protected from multiple read/writes occurring at the same time by a
  *  mutex. */
-pthread_mutex_t ctrl_count_mutex = PTHREAD_MUTEX_INITIALIZER;
-int active_control_threads = 0;
+pthread_mutex_t ctrlCountMutex = PTHREAD_MUTEX_INITIALIZER;
+int activeControlThreads = 0;
 
 
 /******************************************************************************
@@ -59,7 +50,7 @@ int active_control_threads = 0;
 /* Threads monitor this variable, when main() sets this value to TRUE, all
  * threads will terminate themselves after closing open sockets and freeing
  * heap memory. This variable is only modified by main(). */
-int shutdown_server = false;
+int shutdownServer = false;
 
 
 /* The root directory of the server. When a new control connection is accepted,
@@ -101,16 +92,14 @@ char *rootdir;
  *    - directory.c, makeDir(), char * printStart.
  *    - help.c, command_help(), int strLength. ENDIF comments
  *    - transfer.c, perm_neg_check(), char * permdeny.
+ *    - session.c, session(), char * abort.
+ *    - directory.h, #includes, determine if there are ones that aren't required
+ *    - help.c, command_HELP(), is the return value checked, should it be, or
+ *      should the return be void.
  *****************************************************************************/
 
 /******************************************************************************
  * Other TODO's:
- *   - Spellcheck each file. Currently spellchecked: [path.c/h, config.c/h,
- *     ctrlthread.c/h, directory.c/h, help.c/h, main.c, Makefile, misc.c/h,
- *     net.c/h, parser.c/h, path.c/h, queue.c/h, reply.c/h, servercmd.c/h,
- *     session.c/h, switch.c/h, transfer.c/h, users.c/h
- *
- *     config/: user.conf, ftp.conf, netsetup.sh, guinetsetup.pl, 
  *
  *   - Return an error for when [net.c] send_all() fails. Handle this error.
  *   - Test/check the includes in "directory.h". errno.h, stdlib.h, stdio.h... 
@@ -127,32 +116,32 @@ char *rootdir;
  *****************************************************************************/
 int main (int argc, char *argv[])
 {
-  int listen_sfd;       // Listen for control connections on this sfd.
-  int *c_sfd;           // An accepted control connection sfd.
+  int listenSfd;        // Listen for control connections on this sfd.
+  int *csfd;            // An accepted control socket file descriptor.
   pthread_t thread;     // The handle for a new thread.
   pthread_attr_t attr;  // pthread attribute, to set detached state on creation.
   
-  char *root_temp;
+  char *rootTemp;
 
   //Retrieve the name of the root directory from the config file.
-  if ((root_temp = get_config_value ("ROOT_PATH_CONFIG", FTP_CONFIG_FILE)) == NULL)
+  if ((rootTemp = get_config_value ("ROOT_PATH_CONFIG", FTP_CONFIG_FILE)) == NULL)
     return -1;
 
   /* Append the relative path from the server executable to the server root directory
    * to the absolute path of the server executable. */
-  if ((rootdir = get_config_path (root_temp)) == NULL) {
-    free (root_temp);
+  if ((rootdir = get_config_path (rootTemp)) == NULL) {
+    free (rootTemp);
     return -1;
   }
-  free (root_temp);
+  free (rootTemp);
 
-  root_temp = rootdir;
+  rootTemp = rootdir;
   /* Canonicalize the path to the server root directory 
    * (eg. resolve all "..", ".", excessive "/" and symbolic links). */
-  if ((rootdir = canonicalize_file_name (root_temp)) == NULL) {
+  if ((rootdir = canonicalize_file_name (rootTemp)) == NULL) {
     fprintf (stderr, "%s: canonicalize_file_name: %s\n", __FUNCTION__, strerror (errno));
   }
-  free (root_temp);
+  free (rootTemp);
 
   //Initialize the pthread attributes.
   if (pthread_attr_init (&attr) != 0) {
@@ -161,13 +150,13 @@ int main (int argc, char *argv[])
   }
 
   //Set the detach state attribute.
-  if (pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED) != 0) {
+  if (pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED) != 0) {
     fprintf (stderr, "%s: pthread_attr_init: %s\n", __FUNCTION__, strerror (errno));
     return -1;
   }
 
   //Create a socket to listen for control connections.
-  if ((listen_sfd = get_control_sock ()) == -1)
+  if ((listenSfd = get_control_sock ()) == -1)
     return -1;
 
   //Display usage instructions to the server operator, and connection information.
@@ -187,32 +176,32 @@ int main (int argc, char *argv[])
    *    -The functions pthread_mutex_lock or pthread_mutex_unlock return error.
    *    -The command "shutdown" is entered on the server console. */ 
   while (1) {
-    if ((c_sfd = malloc (sizeof (*c_sfd))) == NULL) {
+    if ((csfd = malloc (sizeof (*csfd))) == NULL) {
       fprintf (stderr, "%s: malloc: could not allocate the required space\n",
 	       __FUNCTION__);
       break;
     }
 
     //Accept a connection from the client, or read a server command on stdin.
-    if ((*c_sfd = accept_connection (listen_sfd, ACCEPT_CONTROL, NULL)) == -1) {
-      free (c_sfd);
+    if ((*csfd = accept_connection (listenSfd, ACCEPT_CONTROL, NULL)) == -1) {
+      free (csfd);
       continue;
     } 
-    else if (*c_sfd == STDIN_READY) {   //There is something to read on stdin.
+    else if (*csfd == STDIN_READY) {   //There is something to read on stdin.
       if (read_server_cmd () == SHUTDOWN_SERVER) {
-	shutdown_server = true;
-	free (c_sfd);
+	shutdownServer = true;
+	free (csfd);
 	break;
       } else {
-	free (c_sfd);
+	free (csfd);
 	continue;
       }
     }
 
     //Create a new thread for this control connection.
-    if (pthread_create (&thread, &attr, &control_thread, c_sfd) != 0) {
+    if (pthread_create (&thread, &attr, &control_thread, csfd) != 0) {
       fprintf (stderr, "%s: pthread_create: %s\n", __FUNCTION__, strerror (errno));
-      free (c_sfd);
+      free (csfd);
       continue;
     }
 
@@ -223,15 +212,15 @@ int main (int argc, char *argv[])
 
   free (rootdir);
 
-  if (active_control_threads > 0)
+  if (activeControlThreads > 0)
     printf ("waiting on threads to resolve...\n");
 
   //Wait for the control threads to shutdown.
-  while (active_control_threads > 0) {
+  while (activeControlThreads > 0) {
     sleep (1);
   }
 
-  if (pthread_attr_destroy(&attr) == -1)
+  if (pthread_attr_destroy (&attr) == -1)
     fprintf (stderr, "%s: pthread_attr_destroy: %s\n", __FUNCTION__, strerror (errno));
 
   printf ("All threads have terminated, exiting the program.\n");

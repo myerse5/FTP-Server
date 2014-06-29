@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: users.c
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -20,7 +18,7 @@
 
 
 //Local function prototypes.
-static void getMD5 (char *user, char *password, char *md5str);
+static void get_md5 (char *user, char *password, char *md5str);
 
 
 /******************************************************************************
@@ -32,28 +30,27 @@ void cmd_user (session_info_t *si, char *arg)
   //if user command is given, log current user out
   if (arg == NULL) {
     reply = "501 Syntax error in parameters or arguments.\n";
-    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
     return;
   }
-  si->logged_in = false;
+  si->loggedin = false;
   si->user[0] = '\0';
   
   //Check if user is anonymous. Anonymous user requires no password.
   if (strcasecmp (arg, "anonymous") == 0) {
-    si->logged_in = true;
+    si->loggedin = true;
     
     reply = "230 Login successful.\n";
-    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
     
   } else if (arg != NULL) {
     /* Command will take any argument as a valid username in order
      * to prevent a malicious client from collecting usernames
-     * from server.
-     */
+     * from server. */
     reply = "331 User name okay, need password.\n";
-    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
   }
-  //as long as argument isn't null, copy the string over
+  //As long as the argument isn't null, copy the string over.
   strcpy (si->user, arg);
   return;
 }
@@ -69,40 +66,40 @@ void cmd_pass (session_info_t *si, char *arg)
   char *reply;
  
   //if user is logged in, no pass require
-  if (si->logged_in) {
+  if (si->loggedin) {
     reply = "230 Already logged in.\n";
-    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
     return;
   }
   
   //Check if a username has been given.
-  if (strlen(si->user) > 0) {
+  if (strlen (si->user) > 0) {
     if (arg) {
       if ((pass = get_config_value (si->user, USER_CONFIG_FILE)) == NULL) {
 	reply = "530 Not logged in.\n";
-	send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+	send_all (si->csfd, (uint8_t*)reply, strlen (reply));
       } else {
-	//get md5 of password + username
-	getMD5 (si->user, arg, md5string);
+	//Get the MD5 of the password + username.
+	get_md5 (si->user, arg, md5string);
 	if (strcmp (md5string, pass) == 0) {
 	  reply = "230 Login successful.\n";
-	  si->logged_in = true;
-	  send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+	  si->loggedin = true;
+	  send_all (si->csfd, (uint8_t*)reply, strlen (reply));
 	} else {
 	  //The name was found but the password did not match.
 	  reply = "530 Not logged in.\n";
-	  send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+	  send_all (si->csfd, (uint8_t*)reply, strlen (reply));
 	}
       }
     } else {
       //No argument was given, the USER command fails.
       reply = "501 Syntax error in arguments.\n";
-      send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+      send_all (si->csfd, (uint8_t*)reply, strlen (reply));
       return;
     }
   } else {
     reply = "503 Login with USER first.\n";
-    send_all (si->c_sfd, (uint8_t*)reply, strlen (reply));
+    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
   }
   
   if (pass)
@@ -124,7 +121,7 @@ void cmd_pass (session_info_t *si, char *arg)
  * Original author: Justin Slind
  * Updated by: Evan Myers
  *****************************************************************************/
-static void getMD5 (char *user, char *pass, char *md5str)
+static void get_md5 (char *user, char *pass, char *md5str)
 {
   /* TODO fix the buffer overruns in this block. Username could be greater than
    * 500 characters, password could be longer than 500 characters, both

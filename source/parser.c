@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: parser.c
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -21,7 +19,7 @@
 /******************************************************************************
  * command_arg_count - see "parser.h"
  *****************************************************************************/
-int command_arg_count(const char *cmdString)
+int command_arg_count (const char *cmdString)
 {
   int argCount;
 
@@ -42,9 +40,8 @@ int command_arg_count(const char *cmdString)
 /******************************************************************************
  * command_extract_arg - see "parser.h"
  *****************************************************************************/
-char *command_extract_arg(const char *cmdString)
-{ //BEGIN function 'command_extract_arg'
-
+char *command_extract_arg (const char *cmdString)
+{
   int argCount;
 
   char *argString, 
@@ -55,129 +52,122 @@ char *command_extract_arg(const char *cmdString)
 
   if (argCount < MIN_NUM_ARGS) {
     return NULL;
-  } //END statement 'if'
+  }
 
   tempString = strdup(cmdString);
 
   if ((argString = (char *)calloc((strlen(tempString) + 1), sizeof(char))) == NULL) {
     free(tempString);
     return NULL;
-  } //END statement 'if'
+  }
 
-  command = command_extract_cmd(cmdString);
-  memcpy(argString, (tempString + strlen(command)), ((strlen(tempString) - strlen(command)) * sizeof(char)));
-  trim_whitespace(argString);
+  command = command_extract_cmd (cmdString);
+  memcpy (argString, (tempString + strlen (command)), ((strlen (tempString) - strlen (command)) * sizeof(char)));
+  trim_whitespace (argString);
 
-  if ((argString = (char *)realloc(argString, ((strlen(argString) + 1) * sizeof(char)))) == NULL) {
+  if ((argString = (char *)realloc (argString, ((strlen (argString) + 1) * sizeof(char)))) == NULL) {
     free (command);
     free (tempString);
     return NULL;
-  } //END statement 'if'
+  }
 
-  free(command);
-  free(tempString);
+  free (command);
+  free (tempString);
 
   return argString;
-
-} //END function 'command_extract_arg'
+}
 
 
 /******************************************************************************
  * command_extract_cmd - see "parser.h"
  *****************************************************************************/
-char *command_extract_cmd(const char *cmdString)
-{ //BEGIN function 'command_extract'
-
+char *command_extract_cmd (const char *cmdString)
+{
   char *command,
        *tempString,
        *token;
 
   tempString = strdup(cmdString);
 
-  if ((command = (char *)calloc((strlen(tempString) + 1), sizeof(char))) == NULL) {
-    free(tempString);
+  if ((command = (char *)calloc ((strlen (tempString) + 1), sizeof(char))) == NULL) {
+    free (tempString);
     return NULL;
-  } //END statement 'if'
+  }
 
   token = strtok(tempString, " ");
 
-  if ((command = (char *)realloc(command, ((strlen(token) + 1) * sizeof(char)))) == NULL) {
-    free(tempString);
+  if ((command = (char *)realloc (command, ((strlen(token) + 1) * sizeof(char)))) == NULL) {
+    free (tempString);
     return NULL;
-  } //END statement 'if'
+  }
 
-  strcpy(command, token);
-  convert_to_upper(command);
+  strcpy (command, token);
+  convert_to_upper (command);
 
-  free(tempString);
+  free (tempString);
 
   return command;
-
-} //END function 'command_extract'
+}
 
 
 /******************************************************************************
  * strdup - see "parser.h"
  *****************************************************************************/
-char *strdup(const char *string)
-{ //BEGIN function 'strdup'
-
+char *strdup (const char *string)
+{
   char *duplicate;
 
-  if ((duplicate = (char *)calloc((strlen(string) + 1), sizeof(char))) == NULL) {
+  if ((duplicate = (char *)calloc ((strlen (string) + 1), sizeof(char))) == NULL) {
     return NULL;
-  } //END statement 'if'
+  }
 
   strcpy(duplicate, string);
   trim_whitespace(duplicate);
 
   return duplicate;
-
-} //END function 'strdup'
+}
 
 
 /******************************************************************************
  * convert_to_upper - see "parser.h"
  *****************************************************************************/
-void convert_to_upper(char *string)
-{ //BEGIN function 'convert_to_upper'
+void convert_to_upper (char *string)
+{
+  int i;
 
-  for (int i = 0; i < strlen(string); i++) {
-    string[i] = toupper(string[i]);
-  } //END loop 'for'
-
-} //END function 'convert_to_upper'
+  for (i = 0; i < strlen (string); i++) {
+    string[i] = toupper (string[i]);
+  }
+}
 
 
 /******************************************************************************
  * trim_whitespace - see "parser.h"
  *****************************************************************************/
-void trim_whitespace(char *string)
-{ //BEGIN function 'trim_whitespace'
-
+void trim_whitespace (char *string)
+{
   int length;
 
   char *head,
        *tail;
 
-  length = strlen(string);
+  length = strlen (string);
   head = string - 1;
   tail = string + length;
 
-  while (isspace(*(++head)));
-  while (isspace(*(--tail)) && (tail != head));
+  while (isspace (*(++head)));
+  while (isspace (*(--tail)) && (tail != head));
 
   if ((string + length - 1) != tail) {
     *(tail + 1) = '\0';
   } else if ((head != string) && (tail == head)) {
     *string = '\0';
-  } //END statement 'if-else'
+  }
 
   tail = string;
 
   if (head != string) {
     while (*head) *tail++ = *head++;
     *tail = '\0';
-  } //END statement 'if'
-
-} //END function 'trim_whitespace'
+  }
+}

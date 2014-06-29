@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: reply.c
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description: 
@@ -43,12 +41,12 @@ int send_welcome_mesg_220 (int c_sfd)
 /******************************************************************************
  * send_mesg_227 - see "reply.h"
  *****************************************************************************/
-int send_mesg_227 (int c_sfd, int d_sfd)
+int send_mesg_227 (int csfd, int dsfd)
 {
-  struct sockaddr_in my_addr;
-  socklen_t addr_len;
+  struct sockaddr_in sa;
+  socklen_t addrLen;
   uint8_t mesg[STD_TERM_SZ];
-  int mesg_len;
+  int mesgLen;
 
   /* Used to collect the the decimal value of each byte, which will be sent to
    * the client as specified RFC 959. */
@@ -58,14 +56,14 @@ int send_mesg_227 (int c_sfd, int d_sfd)
   /* Initialize addr_len to the size of an IPv4 address. If getsockname()
    * modifies this value, an IPv4 address was not used to create the PASV
    * socket. */
-  addr_len = sizeof(my_addr);
+  addrLen = sizeof(sa);
 
   //Collect the address info
-  if (getsockname (d_sfd, (struct sockaddr *)&my_addr, &addr_len) == -1)
+  if (getsockname (dsfd, (struct sockaddr *)&sa, &addrLen) == -1)
     return -1;
 
   //Ensure the passive socket has a 4-byte address.
-  if (addr_len > sizeof(my_addr)) {
+  if (addrLen > sizeof(sa)) {
     //The socket is not IPv4, the socket is invalid for the command PASV.
     return -1;
   }
@@ -73,30 +71,30 @@ int send_mesg_227 (int c_sfd, int d_sfd)
   /* Ensure the IPv4 address bytes will be sent to the client in the same order
    * on all systems by converting to network-byte-order before calculating
    * the value of each byte field. */
-  my_addr.sin_addr.s_addr = htonl (my_addr.sin_addr.s_addr);
+  sa.sin_addr.s_addr = htonl (sa.sin_addr.s_addr);
   /* Store each byte of the IPv4 address as a decimal value in preparation for
    * sending the passive mode message. */
-  h1 = (my_addr.sin_addr.s_addr & 0xFF000000) >> (3 * BITS_IN_BYTE);
-  h2 = (my_addr.sin_addr.s_addr & 0x00FF0000) >> (2 * BITS_IN_BYTE);
-  h3 = (my_addr.sin_addr.s_addr & 0x0000FF00) >> (BITS_IN_BYTE);
-  h4 = (my_addr.sin_addr.s_addr & 0x000000FF);
+  h1 = (sa.sin_addr.s_addr & 0xFF000000) >> (3 * BITS_IN_BYTE);
+  h2 = (sa.sin_addr.s_addr & 0x00FF0000) >> (2 * BITS_IN_BYTE);
+  h3 = (sa.sin_addr.s_addr & 0x0000FF00) >> (BITS_IN_BYTE);
+  h4 = (sa.sin_addr.s_addr & 0x000000FF);
 
   /* Ensure the port bytes will be sent to the client in the same order
    * on all systems by converting to network-byte-order before calculating
    * the value of each byte field. */
-  my_addr.sin_port = htons (my_addr.sin_port);
+  sa.sin_port = htons (sa.sin_port);
   /* Store each byte of the port as a decimal value in preparation for
    * sending the passive mode message. */
-  p1 = (my_addr.sin_port & 0xFF00) >> BITS_IN_BYTE;
-  p2 = (my_addr.sin_port & 0x00FF);
+  p1 = (sa.sin_port & 0xFF00) >> BITS_IN_BYTE;
+  p2 = (sa.sin_port & 0x00FF);
 
   //Create the feedback message, code 227.
   sprintf ((char *)mesg, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d).\n", 
 	   h1, h2, h3, h4, p1, p2);
 
-  mesg_len = strlen ((char *)mesg);
+  mesgLen = strlen ((char *)mesg);
   //Send the feedback message to the control socket.
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
 
@@ -107,17 +105,16 @@ int send_mesg_227 (int c_sfd, int d_sfd)
 /******************************************************************************
  * send_mesg_450 - see "reply.h"
  *****************************************************************************/
-int send_mesg_450 (int c_sfd)
+int send_mesg_450 (int csfd)
 {
   uint8_t mesg[] = "450 Requested file action not taken. File unavailable.\n";
-  int mesg_len;
+  int mesgLen;
 
   //Send the complete response message.
-  mesg_len = strlen ((char *)mesg);  
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  mesgLen = strlen ((char *)mesg);  
+  if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
-
   return 0;
 }
 
@@ -125,18 +122,16 @@ int send_mesg_450 (int c_sfd)
 /******************************************************************************
  * send_mesg_451 - see "reply.h"
  *****************************************************************************/
-int send_mesg_451 (int c_sfd)
+int send_mesg_451 (int csfd)
 {
   uint8_t mesg[] = "451 Requested action aborted. Local error in processing.\n";
-  int mesg_len;
+  int mesgLen;
 
   //Send the complete response message.
-  mesg_len = strlen ((char *)mesg);  
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  mesgLen = strlen ((char *)mesg);  
+  if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
-
-
   return 0;
 }
 
@@ -144,17 +139,16 @@ int send_mesg_451 (int c_sfd)
 /******************************************************************************
  * send_mesg_500 - see "reply.h"
  *****************************************************************************/
-int send_mesg_500 (int c_sfd)
+int send_mesg_500 (int csfd)
 {
   uint8_t mesg[] = "500 Syntax error, command unrecognized.\n";
-  int mesg_len;
+  int mesgLen;
 
   //Send the complete response message.
-  mesg_len = strlen ((char *)mesg);  
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  mesgLen = strlen ((char *)mesg);  
+  if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
-
   return 0;
 }
 
@@ -162,17 +156,16 @@ int send_mesg_500 (int c_sfd)
 /******************************************************************************
  * send_mesg_501 - see "reply.h"
  *****************************************************************************/
-int send_mesg_501 (int c_sfd)
+int send_mesg_501 (int csfd)
 {
   uint8_t mesg[] = "501 Syntax error in parameters or arguments.\n";
-  int mesg_len;
+  int mesgLen;
 
   //Send the complete response message.
-  mesg_len = strlen ((char *)mesg);
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  mesgLen = strlen ((char *)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
-
   return 0;
 }
 
@@ -180,17 +173,16 @@ int send_mesg_501 (int c_sfd)
 /******************************************************************************
  * send_mesg_530 - see "reply.h"
  *****************************************************************************/
-int send_mesg_530 (int c_sfd)
+int send_mesg_530 (int csfd)
 {
   uint8_t mesg[] = "530 Please login with USER and PASS.\n";
-  int mesg_len;
+  int mesgLen;
 
   //Send the complete response message.
-  mesg_len = strlen ((char *)mesg);
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  mesgLen = strlen ((char *)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
-
   return 0;
 }
 
@@ -198,14 +190,14 @@ int send_mesg_530 (int c_sfd)
 /******************************************************************************
  * send_mesg_550 - see "reply.h"
  *****************************************************************************/
-int send_mesg_550 (int c_sfd)
+int send_mesg_550 (int csfd)
 {
   uint8_t mesg[] = "550 Requested action not taken. File unavailable.\n";
-  int mesg_len;
+  int mesgLen;
 
   //Send the complete response message.
-  mesg_len = strlen ((char *)mesg);
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  mesgLen = strlen ((char *)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
   return 0;
@@ -215,14 +207,14 @@ int send_mesg_550 (int c_sfd)
 /******************************************************************************
  * send_mesg_553 - see "reply.h"
  *****************************************************************************/
-int send_mesg_553 (int c_sfd)
+int send_mesg_553 (int csfd)
 {
   uint8_t mesg[] = "553 Requested action not taken. File name not allowed.\n";
-  int mesg_len;
+  int mesgLen;
 
   //Send the complete response message.
-  mesg_len = strlen ((char *)mesg);
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  mesgLen = strlen ((char *)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
   return 0;

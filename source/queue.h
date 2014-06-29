@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: queue.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -24,44 +22,41 @@ typedef struct node {
  * Adds a command to the end of the queue.
  *
  * Arguments:
- *      commandstr - null terminated string holding command and parameter.
- *   *cmd_queu_ptr - head of the queue.
+ *     commandstr - Null terminated string holding command and parameter.
+ *   *cmdQueuePtr - Head of the queue.
  *
  * Returns
- * 	head of the queue.
+ * 	Head of the queue.
  *
  * Original author: Justin Slind
  *****************************************************************************/
-queue* addToQueue (char *commandstr, queue *cmd_queue_ptr);
+queue* add_to_queue (char *commandstr, queue *cmdQueuePtr);
 
 
 /******************************************************************************
  * Pulls a command from the front of the queue.
  *
  * Arguments:
- *   commandstr - null terminated string holding command and parameter
- *   cmd_queu_ptr - head the queue
+ *    commandstr - Null terminated string holding command and parameter.
+ *   cmdQueuePtr - Head of the queue
  *
  * Returns
  * 	returns 0 when function is complete - Wrong
  *
  * Original author: Justin Slind
  *****************************************************************************/
-queue* pullFromQueue (char *commandstr, queue *cmd_queue_ptr);
+queue* pull_from_queue (char *commandstr, queue *cmdQueuePtr);
 
 
 /******************************************************************************
- * frees allocated memory in the queue
+ * Frees allocated memory in the queue.
  *
  * Arguments:
- *   cmd_queu_ptr - head the queue
- *
- * Returns
- * 	void
+ *   cmdQueuePtr - Head of the queue.
  *
  * Original author: Justin Slind
  *****************************************************************************/
-void freeQueue (queue *cmd_queue_ptr);
+void free_queue (queue *cmdQueuePtr);
 
 
 #endif //__QUEUE_H__

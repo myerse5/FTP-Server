@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: queue.c
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -14,22 +12,24 @@
 #include <stdlib.h>
 #include "queue.h"
 
+
 /******************************************************************************
- * addToQueue - see "queue.h"
+ * add_to_queue - see "queue.h"
  *****************************************************************************/
-queue* addToQueue (char *commandstr, queue *cmd_queue_ptr) {
+queue* add_to_queue (char *commandstr, queue *cmdQueuePtr)
+{
   queue *temp;
   queue *newptr = malloc (sizeof (queue));
   if (!newptr) {
     fprintf (stderr, "%s: malloc: could not allocate the required space\n", __FUNCTION__);
-    return cmd_queue_ptr;
+    return cmdQueuePtr;
   }
-  strcpy(newptr->cmd,commandstr);
+  strcpy (newptr->cmd, commandstr);
   newptr->next = NULL;
   
   
-  if (cmd_queue_ptr) {
-    temp = cmd_queue_ptr;
+  if (cmdQueuePtr) {
+    temp = cmdQueuePtr;
     //Iterate to the end of the queue.
     while(temp->next)
       temp = temp->next;
@@ -37,21 +37,24 @@ queue* addToQueue (char *commandstr, queue *cmd_queue_ptr) {
     temp->next = newptr;
   } else {
     //Otherwise node is the head of the queue.
-    cmd_queue_ptr = newptr; 
+    cmdQueuePtr = newptr; 
   }
   
-  return cmd_queue_ptr;
+  return cmdQueuePtr;
 }
 
 
 /******************************************************************************
- * pullFromQueue - see "queue.h"
+ * pull_from_queue - see "queue.h"
  *****************************************************************************/
-queue* pullFromQueue(char *commandstr, queue *cmd_queue_ptr) {
-  if (cmd_queue_ptr) {
-    queue *tempptr = cmd_queue_ptr->next;
-    strcpy(commandstr, cmd_queue_ptr->cmd);
-    free(cmd_queue_ptr);
+queue* pull_from_queue (char *commandstr, queue *cmdQueuePtr)
+{
+  queue *tempptr;
+
+  if (cmdQueuePtr) {
+    tempptr = cmdQueuePtr->next;
+    strcpy (commandstr, cmdQueuePtr->cmd);
+    free (cmdQueuePtr);
     return tempptr;
   } else {
     return NULL;
@@ -60,15 +63,15 @@ queue* pullFromQueue(char *commandstr, queue *cmd_queue_ptr) {
 
 
 /******************************************************************************
- * freeQueue - see "queue.h"
+ * free_queue - see "queue.h"
  *****************************************************************************/
-void freeQueue (queue *cmd_queue_ptr) {
-  if (cmd_queue_ptr) {
-    if (cmd_queue_ptr->next) {
-      freeQueue(cmd_queue_ptr->next);
-      cmd_queue_ptr->next = NULL;
+void free_queue (queue *cmdQueuePtr) {
+  if (cmdQueuePtr) {
+    if (cmdQueuePtr->next) {
+      free_queue (cmdQueuePtr->next);
+      cmdQueuePtr->next = NULL;
     }
-    free(cmd_queue_ptr);
+    free (cmdQueuePtr);
   }
   return;
 }

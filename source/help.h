@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: help.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -29,7 +27,7 @@
  *
  * Original author: James Yoo
  *****************************************************************************/
-int command_help(session_info_t *si, char *arg);
+int command_help (session_info_t *si, char *arg);
 
 
 #endif  //__HELP_H__

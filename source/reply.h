@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: reply.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -11,6 +9,19 @@
  *    repetition in places where a response message is sent. Also, this will
  *    help ensure that all messages that are meant to send the same data will
  *    do so.
+ *
+ * Regarding documentation of this file:
+ *    Most of the functions in this file contain the same arguments and return
+ *    values. They will be ommitted so as not to become trivial and repetitive.
+ *    The missing information can be found directly below.
+ *
+ * Arguments:
+ *   csfd - The file descriptor of the control connection socket. The response
+ *           message will be sent to this socket.
+ *
+ * Return values:
+ *    0   The message was successfully sent to the socket.
+ *   -1   The entire message was not sent to the socket.
  *****************************************************************************/
 #ifndef __REPLY_H__
 #define __REPLY_H__
@@ -19,18 +30,8 @@
 /******************************************************************************
  * Send the welcome message to a newly connected client. This function should
  * be called after a control connection has been established with a client.
- *
- * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *
- * Return values:
- *    0   The message was successfully sent to the socket.
- *   -1   The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
-int send_welcome_mesg_220 (int c_sfd);
+int send_welcome_mesg_220 (int csfd);
 
 
 /******************************************************************************
@@ -46,11 +47,11 @@ int send_welcome_mesg_220 (int c_sfd);
  *       socket (d_sfd). Both are required for this function.
  *
  * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *   d_sfd - The file descriptor of the data connection socket. The address
- *           information sent to the control connection socket will be created
- *           with this socket.
+ *   csfd - The file descriptor of the control connection socket. The response
+ *          message will be sent to this socket.
+ *   dsfd - The file descriptor of the data connection socket. The address
+ *          information sent to the control connection socket will be created
+ *          with this socket.
  *
  * Return values:
  *    0   The message was successfully sent to the socket.
@@ -58,124 +59,53 @@ int send_welcome_mesg_220 (int c_sfd);
  *
  * Original author: Evan Myers
  *****************************************************************************/
-int send_mesg_227 (int c_sfd, int d_sfd);
+int send_mesg_227 (int csfd, int dsfd);
 
 
 /******************************************************************************
  * A permanent negative response. Action not taken because file is unavailable.
- *
- * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *
- * Return values:
- *    0   The message was successfully sent to the socket.
- *   -1   The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
-int send_mesg_450 (int c_sfd);
+int send_mesg_450 (int csfd);
 
 /******************************************************************************
  * A negative response sent when there was an error in processing.
- *
- * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *
- * Return values:
- *    0   The message was successfully sent to the socket.
- *   -1   The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
-int send_mesg_451 (int c_sfd);
+int send_mesg_451 (int csfd);
 
 
 /******************************************************************************
  * This function generates a negative response message for when the command
- * was not recognized.
- *
- * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *
- * Return values:
- *   0    The message was successfully sent to the socket.
- *  -1    The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
-int send_mesg_500 (int c_sfd);
+int send_mesg_500 (int csfd);
 
 
 /******************************************************************************
  * This function generates a negative response message for when errors have
  * been detected in the argument of a command.
- *
- * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *
- * Return values:
- *   0    The message was successfully sent to the socket.
- *  -1    The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
-int send_mesg_501 (int c_sfd);
+int send_mesg_501 (int csfd);
 
 
 /******************************************************************************
  * This function generates a negative response message for when the client has
  * entered a command which requires the client to be logged in, but this
  * requirement has not been met.
- *
- * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *
- * Return values:
- *   0    The message was successfully sent to the socket.
- *  -1    The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
-int send_mesg_530 (int c_sfd);
+int send_mesg_530 (int csfd);
 
 
 /******************************************************************************
  * This function generates a negative response message for when a file cannot
  * be processed due to a lack of permissions.
- *
- * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *
- * Return values:
- *   0    The message was successfully sent to the socket.
- *  -1    The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
-int send_mesg_550 (int c_sfd);
+int send_mesg_550 (int csfd);
 
 
 /******************************************************************************
  * This function generates a negative response message for when the pathname
  * of a file argument is not allowed.
- *
- * Arguments:
- *   c_sfd - The file descriptor of the control connection socket. The response
- *           message will be sent to this socket.
- *
- * Return values:
- *   0    The message was successfully sent to the socket.
- *  -1    The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
-int send_mesg_553 (int c_sfd);
+int send_mesg_553 (int csfd);
 
 
 #endif //__REPLY_H__

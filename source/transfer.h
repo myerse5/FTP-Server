@@ -1,13 +1,11 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: transfer.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
- *   FTP commands that deal with writing files to the file system:
- *   STOR, APPE, STOU
+ *   FTP commands that deal with transfering files with the client: STOR, APPE,
+ *   STOU, and RETR.
  *****************************************************************************/
 #ifndef __TRANSFER_H__
 #define __TRANSFER_H__
@@ -28,7 +26,6 @@
  *       following "RFC 959".
  *
  * Original author: Justin Slind
- * Checked by: Evan Myers
  *****************************************************************************/
 void cmd_stou (session_info_t *si, char *arg);
 
@@ -40,7 +37,6 @@ void cmd_stou (session_info_t *si, char *arg);
  *   cmd - The filename argument.
  *
  * Original author: Justin Slind
- * Checked by: Evan Myers
  *****************************************************************************/
 void cmd_stor (session_info_t *si, char *cmd);
 
@@ -52,9 +48,8 @@ void cmd_stor (session_info_t *si, char *cmd);
  *   cmd - current command with parameter
  *
  * Original author: Justin Slind
- * Checked by: Evan Myers
  *****************************************************************************/
-void cmd_appe(session_info_t *si, char *cmd);
+void cmd_appe (session_info_t *si, char *cmd);
 
 /******************************************************************************
  * Retrieve a file from the server file system.
@@ -66,24 +61,25 @@ void cmd_appe(session_info_t *si, char *cmd);
  * Original author: James Yoo
  * Rewritten by: Evan Myers
  *****************************************************************************/
-void command_retrieve(session_info_t *si, char *path);
+void cmd_retr (session_info_t *si, char *path);
 
 /******************************************************************************
- * Close all sockets, reset stored socket file descriptor in the
+ * Close all sockets, reset the stored data socket file descriptor in the
  * session_info_t structure, and close the file pointer when appropriate.
  *
  * This function was created to help defend against programmer error. These
  * closing statements appear in many places in the stor command.
  *
  * Arguments:
- *   si - info for current session
- *   fp - the open filestream, set this to NULL if no filestream has been
+ *   si - Info for the current session.
+ *   fp - The open filestream, set this to NULL if no filestream has been
  *        opened.
  *   errcode - The type of error. This should be set to zero if no error
- *             occurred.
+ *             has occurred (a clean exit from the caller function).
  *
  * Original author: Evan Myers
  *****************************************************************************/
 void cleanup_stor_recv (session_info_t *si, FILE *fp, int errcode);
+
 
 #endif //__TRANSFER_H__

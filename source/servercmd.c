@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: servercmd.c
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -18,7 +16,7 @@
 #include "servercmd.h"
 
 
-#define MAX_SERVER_CMD_SZ 81 //Standard terminal window size.
+#define MAX_SERVER_CMD_SZ 80 //Standard terminal window size.
 
 
 /******************************************************************************
@@ -89,22 +87,6 @@ static int server_info (void)
 
 
 /******************************************************************************
- * Display a list of server commands to the server operator.
- *
- * Original author: Evan Myers
- *****************************************************************************/
-static void print_help (void)
-{
-  printf ("The current commands are:\n");
-  printf ("\tclients\n");
-  printf ("\thelp\n");
-  printf ("\tserverinfo\n");
-  printf ("\tshutdown\n");
-  return;
-}
-
-
-/******************************************************************************
  * read_server_cmd - see servercmd.h
  *****************************************************************************/
 int read_server_cmd (void)
@@ -135,4 +117,20 @@ int read_server_cmd (void)
   }
 
   return 0;
+}
+
+
+/******************************************************************************
+ * Display a list of server commands to the server operator.
+ *
+ * Original author: Evan Myers
+ *****************************************************************************/
+static void print_help (void)
+{
+  printf ("The current commands are:\n");
+  printf ("\tclients\n");
+  printf ("\thelp\n");
+  printf ("\tserverinfo\n");
+  printf ("\tshutdown\n");
+  return;
 }

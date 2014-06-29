@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: session.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -14,8 +12,7 @@
 #define __SESSION_H__
 
 
-#include <stdbool.h>
-#include "queue.h"
+#include <stdbool.h>  //Required for 'bool' in structure.
 
 
 //TODO update these random, arbitrary values.
@@ -49,15 +46,15 @@
  * the command thread notices this change and terminates).
  *****************************************************************************/
 typedef struct {
-  int c_sfd;	        	//control socket, rx from main
-  int d_sfd;		      	//data socket, created from command thread
+  int csfd;	        	//control socket, rx from main
+  int dsfd;		      	//data socket, created from command thread
   char cwd[CMD_STRLEN];		//current working directory
   char user[USER_STRLEN];	//username
-  bool logged_in;		//whether user is logged in
-  bool cmd_complete;		//command thread is complete
-  bool cmd_abort;		//command to abort
-  bool cmd_quit;		//command to quit has been given
-  char cmd_string[CMD_STRLEN];	//command string for current command
+  bool loggedin;		//whether user is logged in
+  bool cmdComplete;		//command thread is complete
+  bool cmdAbort;		//command to abort
+  bool cmdQuit;	         	//command to quit has been given
+  char cmdString[CMD_STRLEN];	//command string for current command
   char type;
 } session_info_t;
 
@@ -86,7 +83,7 @@ typedef struct {
  * has cleaned up and sent the appropriate messages to the client).
  *
  * Arguments:
- *   c_sfd - a control connection socket.
+ *   csfd - a control connection socket.
  *
  * Return values:
  *    0   success
@@ -94,7 +91,7 @@ typedef struct {
  *
  * Original author: Justin Slind
  *****************************************************************************/
-int session (int c_sfd);
+int session (int csfd);
 
 
 /******************************************************************************
@@ -111,7 +108,7 @@ int session (int c_sfd);
  *
  * Original author: Justin Slind
  *****************************************************************************/
-int readCmd (char *str, int sock, session_info_t *si);
+int read_cmd (char *str, int sock, session_info_t *si);
 
 
 #endif //__SESSION_H__

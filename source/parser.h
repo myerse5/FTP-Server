@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: parser.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -14,54 +12,51 @@
 
 
 /******************************************************************************
- * This function probably counts the number of arguments. No documentation.
+ * No documentation.
  *
  * Original author: James Yoo
  *****************************************************************************/
-int command_arg_count(const char *cmdString);
+int command_arg_count (const char *cmdString);
 
 
 /******************************************************************************
- * This function probably extracts an argument. No documentation.
+ * No documentation.
  *
  * Original author: James Yoo
  *****************************************************************************/
-char *command_extract_arg(const char *cmdString);
+char *command_extract_arg (const char *cmdString);
 
 
 /******************************************************************************
- * This function probably extracts a command. No documentation.
+ * No documentation.
  *
  * Original author: James Yoo
  *****************************************************************************/
-char *command_extract_cmd(const char *cmdString);
+char *command_extract_cmd (const char *cmdString);
 
 
 /******************************************************************************
- * An acronym for the function name. No documentation. very bad combination.
+ * No documentation. String duplicate probably.
  *
  * Original author: James Yoo
  *****************************************************************************/
-char *strdup(const char *string);
+char *strdup (const char *string);
 
 
 /******************************************************************************
- * Probably converts to uppercase. No documentation.
+ * No documentation.
  *
  * Original author: James Yoo
  *****************************************************************************/
-void convert_to_upper(char *string);
+void convert_to_upper (char *string);
 
 
 /******************************************************************************
- * Probably trims white space. No documentation.
+ * No documentation.
  *
  * Original author: James Yoo
- *
- * Acknowledgement:
- * http://www.stackoverflow.com/questions/122616/how-do-i-trim-leading-trailing-whitespace-in-a-standard-way/
  *****************************************************************************/
-void trim_whitespace(char *string);
+void trim_whitespace (char *string);
 
 
 #endif //__PARSER_H__

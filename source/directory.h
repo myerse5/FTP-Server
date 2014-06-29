@@ -1,21 +1,18 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #2 - ftp server
- * Files: directory.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  * 
  * Description:
- *   FTP functions that create or change directories.
+ *   FTP functions that create, change, or list directories.
  *****************************************************************************/
 #ifndef __DIRECTORY_H__
 #define __DIRECTORY_H__
 
 
+#include <dirent.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <dirent.h>
-#include <errno.h>
 #include "session.h" //Required for session_info_t in function prototype.
 
 
@@ -23,7 +20,7 @@
  * Send the files in a directory over a data connection.
  *
  * This function handles the communication on the control connection. It will
- * call listDirect() (a static helper function) to send the files in the
+ * call list_directory() (a static helper function) to send the files in the
  * directory on the data connection.
  *
  * Arguments: 
@@ -38,7 +35,7 @@ void cmd_list_nlst (session_info_t *si, char *argpath, bool detail);
 
 
 /******************************************************************************
- * Create a directory.
+ * Create a directory in the FTP server file system.
  *
  * Arguments:
  *        si - A pointer to the session information maintained by session().
@@ -48,7 +45,7 @@ void cmd_list_nlst (session_info_t *si, char *argpath, bool detail);
  * Original author: Alex Tai
  * Checked by: Evan Myers
  *****************************************************************************/
-void makeDir (session_info_t *si, char *filepath);
+void cmd_mkd (session_info_t *si, char *filepath);
 
 
 /******************************************************************************

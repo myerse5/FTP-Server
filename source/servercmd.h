@@ -1,8 +1,6 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: servercmd.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
@@ -13,7 +11,9 @@
 #define __SERVERCMD_H__
 
 
-#define SHUTDOWN_SERVER -999  //Inform main() to shutdown the server.
+/* Inform main() to shutdown the server. This number may be changed freely, but
+ * the replacement MUST be negative and MUST not interfere with errno (-1). */
+#define SHUTDOWN_SERVER -999 
 
 
 /******************************************************************************

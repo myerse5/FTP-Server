@@ -1,17 +1,11 @@
 /******************************************************************************
- * Students: Evan Myers, Justin Slind, Alex Tai, James Yoo
- * Course: CMPT-361
- * Assignment #3 - ftp server
- * File: config.h
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
+ * FTP-Server
  * Date: November 2013
  *
  * Description:
  *   Functions that operate on the server configuration file, ftp.conf, are
  *   found in this file.
- *
- * Acknowledgements:
- *   Evan - The decision to include the configuration file was made after a
- *          conversation with Dr. Nicholas Boers.
  *****************************************************************************/
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
@@ -32,7 +26,9 @@
  * function (the returned string was made using malloc).
  *
  * Arguments:
- *   config_setting - Retrieve the value of this setting from the config file.
+ *   configSetting - Retrieve the value of this setting from the config file.
+ *
+ *   filename - return the full pathname for the configuration file
  *
  * Returns:
  *   Return a pointer to the string of all characters found after the target
@@ -47,7 +43,7 @@
  *
  * Original author: Evan Myers
  *****************************************************************************/
-char *get_config_value (const char *config_setting, const char *filen);
+char *get_config_value (const char *configSetting, const char *filename);
 
 
 /******************************************************************************
@@ -59,20 +55,15 @@ char *get_config_value (const char *config_setting, const char *filen);
  * function.
  *
  * Arguments:
- *   filen - return the full pathname for this configuration file.
+ *   filename - return the full pathname for the configuration file.
  *
  * Returns:
  *   A pointer to the absolute pathname string. If NULL is returned, there was
  *   an error, and the pathname could not be determined.
  *
  * Original author: Evan Myers
- *
- * Acknowledgements:
- *   This function is quite similar to the opening portion of Evan's function
- *   'client_file_setup' in the file 'fileop.c' submitted in his second
- *   assignment.
  *****************************************************************************/
-char *get_config_path (const char *filen);
+char *get_config_path (const char *filename);
 
 
 #endif //__CONFIG_H__
