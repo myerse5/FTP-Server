@@ -23,20 +23,19 @@
  *****************************************************************************/
 void cmd_type (session_info_t *si, char *arg)
 {
-  char *ascii = "200 Switching to ASCII mode.\n";
-  char *fail = "504 Command not implemented for that parameter.\n";
-  char *notloggedin = "530 Please login with USER and PASS.\n";
-  char *syntaxerror = "501 Syntax error in arguments.\n";
-  char *image = "200 Switching to Image mode.\n";
+  const char *reply;
+  int csfd = si->csfd;
 
-  //must log in to change type
+  //The user must be logged in to change the type.
   if (!si->loggedin) {
-    send_all(si->csfd, (uint8_t *)notloggedin, strlen (notloggedin));
+    reply = "530 Please login with USER and PASS.\n";
+    send_all (csfd, (uint8_t *)reply, strlen (reply));
     return;
   }
 
   if (!arg) {
-    send_all (si->csfd, (uint8_t *)syntaxerror, strlen (syntaxerror));
+    reply = "501 Syntax error in arguments.\n";
+    send_all (csfd, (uint8_t *)syntaxerror, strlen (syntaxerror));
     return;
   }
 
@@ -44,27 +43,32 @@ void cmd_type (session_info_t *si, char *arg)
   if (strlen (arg) == 1) {
     arg[0] = tolower (arg[0]); //change arg to lowercase
     if (arg[0] == 'a') {
-      send_all(si->csfd, (uint8_t *)ascii, strlen (ascii));
+      reply = "200 Switching to ASCII mode.\n";
+      send_all (csfd, (uint8_t *)reply, strlen (reply));
       si->type = 'a';
     } else if (arg[0] == 'i') {
-      send_all(si->csfd, (uint8_t *)image, strlen (image));
+      reply = "200 Switching to Image mode.\n";
+      send_all (csfd, (uint8_t *)reply, strlen (reply));
       si->type = 'i';
     } else {
-      send_all(si->csfd, (uint8_t *)fail, strlen (fail));
+      reply = "504 Command not implemented for that parameter.\n";
+      send_all (csfd, (uint8_t *)reply, strlen (reply));
     }
     return;
   }
 
-  if (strlen(arg) == 3) {
+  if (strlen (arg) == 3) {
     //set interesting chars to lowercase
     if (strcasecmp (arg, "a n") == 0) {
-      send_all (si->csfd, (uint8_t *)ascii, strlen (ascii));
+      reply = "200 Switching to ASCII mode.\n";
+      send_all (csfd, (uint8_t *)reply, strlen (reply));
       si->type ='a';
       return;
     }
   }
 
-  send_all (si->csfd, (uint8_t *)fail, strlen (fail));
+  reply = "504 Command not implemented for that parameter.\n";
+  send_all (csfd, (uint8_t *)reply, strlen (reply));
   return;
 }
 
