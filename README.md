@@ -1,8 +1,6 @@
 FTP-Server
 ==========
-An FTP server created from scratch. Allowing global access to this server is
-not recommended at this time. The server can be used on a local network where
-all users can be trusted.
+A multithreaded FTP server built for UNIX systems using Berkley sockets API. Allowing global access to this server is not recommended at this time.
 
 
 How To Install

@@ -35,7 +35,7 @@ void cmd_type (session_info_t *si, char *arg)
 
   if (!arg) {
     reply = "501 Syntax error in arguments.\n";
-    send_all (csfd, (uint8_t *)syntaxerror, strlen (syntaxerror));
+    send_all (csfd, (uint8_t *)reply, strlen (reply));
     return;
   }
 

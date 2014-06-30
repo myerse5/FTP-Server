@@ -8,26 +8,27 @@
  *   contains an FTP command along with all of its relevant arguments.
  *****************************************************************************/
 #include <ctype.h>
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include "parser.h"
 
 
-//The minimum allowed number of arguments for command_extract_arg().
+/* To extract an argument from the command string there must be at least two
+ * tokens (cmd + arg + ...). */
 #define MIN_NUM_ARGS 2 
+
 
 /******************************************************************************
  * command_arg_count - see "parser.h"
  *****************************************************************************/
 int command_arg_count (const char *cmdString)
 {
-  int argCount;
+  int argCount = 0;
 
-  argCount = 0;
-
-  for (int i = 0; i < strlen(cmdString); i++) {
-    if (!isspace(cmdString[i])) {
-      while (!isspace(cmdString[i]) && (i < strlen(cmdString))) {
+  for (int i = 0; i < strlen (cmdString); i++) {
+    if (!isspace (cmdString[i])) {
+      while (!isspace (cmdString[i]) && (i < strlen (cmdString))) {
 	i++;
       }
       argCount++;
@@ -43,29 +44,39 @@ int command_arg_count (const char *cmdString)
 char *command_extract_arg (const char *cmdString)
 {
   int argCount;
+  int tempLen;
+  int argLen;
 
-  char *argString, 
-       *command,
-       *tempString;
+  char *argString; 
+  char *command;
+  char *tempString;
 
-  argCount = command_arg_count(cmdString);
+  argCount = command_arg_count (cmdString);
 
   if (argCount < MIN_NUM_ARGS) {
     return NULL;
   }
 
-  tempString = strdup(cmdString);
+  tempString = strdup (cmdString);
+  tempLen = strlen (tempString) + 1; //+1 for a null terminator.
 
-  if ((argString = (char *)calloc((strlen(tempString) + 1), sizeof(char))) == NULL) {
-    free(tempString);
+  if ((argString = malloc (tempLen * sizeof(char))) == NULL) {
+    fprintf (stderr, 
+	     "%s: malloc: could not allocate required space\n", __FUNCTION__);
+    free (tempString);
     return NULL;
   }
 
   command = command_extract_cmd (cmdString);
-  memcpy (argString, (tempString + strlen (command)), ((strlen (tempString) - strlen (command)) * sizeof(char)));
-  trim_whitespace (argString);
+  memcpy (argString, (tempString + strlen (command)), 
+	  ((strlen (tempString) - strlen (command)) * sizeof(char)));
 
-  if ((argString = (char *)realloc (argString, ((strlen (argString) + 1) * sizeof(char)))) == NULL) {
+  trim_whitespace (argString);
+  argLen = strlen (argString) + 1; //+1 for a null terminator.
+
+  if ((argString = realloc (argString, argLen * sizeof(char))) == NULL) {
+    fprintf (stderr, 
+	     "%s: realloc: could not allocate required space\n", __FUNCTION__);
     free (command);
     free (tempString);
     return NULL;
@@ -83,20 +94,29 @@ char *command_extract_arg (const char *cmdString)
  *****************************************************************************/
 char *command_extract_cmd (const char *cmdString)
 {
-  char *command,
-       *tempString,
-       *token;
+  char *command;
+  char *tempString;
+  char *token;
+  int trimLen;
+  int tokLen;
 
-  tempString = strdup(cmdString);
 
-  if ((command = (char *)calloc ((strlen (tempString) + 1), sizeof(char))) == NULL) {
+  tempString = strdup (cmdString);
+  trimLen = strlen (tempString) + 1; //+1 for a null terminator.
+
+  if ((command = malloc (trimLen * sizeof(char))) == NULL) {
+    fprintf (stderr, 
+	     "%s: malloc: could not allocate required space\n", __FUNCTION__);
     free (tempString);
     return NULL;
   }
 
-  token = strtok(tempString, " ");
+  token = strtok (tempString, " ");
+  tokLen = strlen (token) + 1; //+1 for a null terminator.
 
-  if ((command = (char *)realloc (command, ((strlen(token) + 1) * sizeof(char)))) == NULL) {
+  if ((command = realloc (command, tokLen * sizeof(char))) == NULL) {
+    fprintf (stderr, 
+	     "%s: realloc: could not allocate required space\n", __FUNCTION__);
     free (tempString);
     return NULL;
   }
@@ -116,13 +136,18 @@ char *command_extract_cmd (const char *cmdString)
 char *strdup (const char *string)
 {
   char *duplicate;
+  int strLen;
 
-  if ((duplicate = (char *)calloc ((strlen (string) + 1), sizeof(char))) == NULL) {
+  strLen = strlen (string) + 1; //+1 for null terminator.
+
+  if ((duplicate = malloc (strLen * sizeof(char))) == NULL) {
+    fprintf (stderr,
+	     "%s: malloc: could not allocate required space\n", __FUNCTION__);
     return NULL;
   }
 
-  strcpy(duplicate, string);
-  trim_whitespace(duplicate);
+  strcpy (duplicate, string);
+  trim_whitespace (duplicate);
 
   return duplicate;
 }
@@ -147,17 +172,19 @@ void convert_to_upper (char *string)
 void trim_whitespace (char *string)
 {
   int length;
-
-  char *head,
-       *tail;
+  char *head;
+  char *tail;
 
   length = strlen (string);
   head = string - 1;
   tail = string + length;
 
+  //Point the head pointer to the first non-whitespace character.
   while (isspace (*(++head)));
+  //Point the tail pointer to the last non-whitespace character.
   while (isspace (*(--tail)) && (tail != head));
 
+  //Trim trailing whitespace.
   if ((string + length - 1) != tail) {
     *(tail + 1) = '\0';
   } else if ((head != string) && (tail == head)) {
@@ -166,6 +193,7 @@ void trim_whitespace (char *string)
 
   tail = string;
 
+  //Trim leading whitespace.
   if (head != string) {
     while (*head) *tail++ = *head++;
     *tail = '\0';

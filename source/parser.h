@@ -12,7 +12,11 @@
 
 
 /******************************************************************************
- * No documentation.
+ * Count the number of arguments that follow a command from a command received
+ * on the control connection from a client. Any leading or trailing whitespace
+ * must be removed before calling this function to receive an accurate count.
+ *
+ * Returns: The number of arguments found after a command.
  *
  * Original author: James Yoo
  *****************************************************************************/
@@ -20,7 +24,13 @@ int command_arg_count (const char *cmdString);
 
 
 /******************************************************************************
- * No documentation.
+ * TODO: malloc/realloc called 6 to get the argument string. Fix this.
+ *
+ * Extract a string containing all arguments found after the first token from
+ * the input received from a client over the control connection. The returned
+ * string will have all leading/trailing whitespace removed.
+ *
+ * The returned string must be freed by the caller.
  *
  * Original author: James Yoo
  *****************************************************************************/
@@ -28,7 +38,13 @@ char *command_extract_arg (const char *cmdString);
 
 
 /******************************************************************************
- * No documentation.
+ * TODO: malloc/realloc is called 3 times to retrieve the first token. Fix this.
+ *
+ * Extract the first token (the command) from the input received from a client
+ * over the control connection. The returned string will have all
+ * leading/trailing whitespace removed.
+ *
+ * The returned string must be freed by the caller.
  *
  * Original author: James Yoo
  *****************************************************************************/
@@ -36,7 +52,8 @@ char *command_extract_cmd (const char *cmdString);
 
 
 /******************************************************************************
- * No documentation. String duplicate probably.
+ * Duplicate a string, and remove all leading/trailing whitespace from the
+ * returned copy of the string.
  *
  * Original author: James Yoo
  *****************************************************************************/
@@ -44,7 +61,7 @@ char *strdup (const char *string);
 
 
 /******************************************************************************
- * No documentation.
+ * Convert all lower case characters in a string to uppercase.
  *
  * Original author: James Yoo
  *****************************************************************************/
@@ -52,7 +69,7 @@ void convert_to_upper (char *string);
 
 
 /******************************************************************************
- * No documentation.
+ * Remove any leading/trailing whitespace from a string.
  *
  * Original author: James Yoo
  *****************************************************************************/

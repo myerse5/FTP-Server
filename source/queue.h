@@ -41,7 +41,8 @@ queue* add_to_queue (char *commandstr, queue *cmdQueuePtr);
  *   cmdQueuePtr - Head of the queue
  *
  * Returns
- * 	returns 0 when function is complete - Wrong
+ *   Queue* - The next command to be processed is returned.
+ *   NULL - There was nothing in the queue to return.
  *
  * Original author: Justin Slind
  *****************************************************************************/
