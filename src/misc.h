@@ -52,12 +52,13 @@ void cmd_syst (session_info_t *si);
  * Set the file transfer structure.
  *
  * Arguments:
- *   si - The control thread session information.
- *  arg - The argument received from the client along with the STRU command.
+ *       si - The control thread session information.
+ *      arg - The argument received from the client along with the STRU command.
+ *  numArgs - The number of arguments to the command.
  *
  * Original author: James Yoo
  *****************************************************************************/
-void cmd_stru (session_info_t *si, char *arg, int argCount);
+void cmd_stru (session_info_t *si, char *arg, int numArgs);
 
 
 /******************************************************************************

@@ -7,9 +7,9 @@
  *   Miscellaneous ftp commands that don't fit in other categories at this
  *   time.
  *****************************************************************************/
+#include <ctype.h>
 #include <strings.h>
 #include <string.h>
-#include <ctype.h>
 #include "misc.h"
 #include "net.h"
 #include "session.h"
@@ -110,18 +110,18 @@ void cmd_syst (session_info_t *si)
 /******************************************************************************
  * cmd_stru - see "misc.h"
  *****************************************************************************/
-void cmd_stru (session_info_t *si, char *arg, int argCount)
+void cmd_stru (session_info_t *si, char *arg, int numArgs)
 {
   char *reply;
 
-  if ((argCount > MAX_NUM_ARGS) || (arg == NULL)) {
-    reply = "200 - Switching to File Structure.\n";
+  if ((numArgs > MAX_NUM_ARGS) || (arg == NULL)) {
+    reply = "501 - Syntax error in parameters";
     send_all (si->csfd, (uint8_t *)reply, strlen (reply));
     return;
   }
 
-  if (strcmp(arg, "F") == 0) {
-    reply = "501 - Syntax error in parameters";
+  if (strcmp (arg, "F") == 0) {
+    reply = "200 - Switching to File Structure.\n";
     send_all (si->csfd, (uint8_t *)reply, strlen (reply));
     return;
   } else {

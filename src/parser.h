@@ -12,6 +12,20 @@
 
 
 /******************************************************************************
+ * Separate the first token (the command) from all other tokens (the arguments).
+ * The string passed to this function will be set to the command token, and any
+ * arguments appearing after the command will be returned by the function as a
+ * string. The caller function must free the returned string as it was created
+ * using a call to malloc().
+ *
+ * Return values:
+ *   NULL  - There are no arguments.
+ *   char* - The argument string.
+ *****************************************************************************/
+char *separate_cmd_from_args (char **cmdLineStr, int numArgs);
+
+
+/******************************************************************************
  * Count the number of arguments that follow a command from a command received
  * on the control connection from a client. Any leading or trailing whitespace
  * must be removed before calling this function to receive an accurate count.
@@ -24,31 +38,10 @@ int get_arg_count (const char *cmdString);
 
 
 /******************************************************************************
- * TODO: malloc/realloc called 6 to get the argument string. Fix this.
- *
- * Extract a string containing all arguments found after the first token from
- * the input received from a client over the control connection. The returned
- * string will have all leading/trailing whitespace removed.
- *
- * The returned string must be freed by the caller.
+ * Convert all lower case characters in a string to uppercase.
  *
  * Original author: James Yoo
  *****************************************************************************/
-char *extract_arg_string (const char *cmdString);
-
-
-/******************************************************************************
- * TODO: malloc/realloc is called 3 times to retrieve the first token. Fix this.
- *
- * Extract the first token (the command) from the input received from a client
- * over the control connection. The returned string will have all
- * leading/trailing whitespace removed.
- *
- * The returned string must be freed by the caller.
- *
- * Original author: James Yoo
- *****************************************************************************/
-char *extract_cmd_string (const char *cmdString);
-
+void convert_to_upper (char *string);
 
 #endif //__PARSER_H__

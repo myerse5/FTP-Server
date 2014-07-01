@@ -37,7 +37,7 @@ void *command_switch (void *param) {
   session_info_t *si;
   struct tm *timeInfo;
   time_t rawTime;
-  int argCount, numArgs;
+  int numArgs;
   char *arg, *cmd, *cmdLine;
   int csfd;
 
@@ -47,7 +47,7 @@ void *command_switch (void *param) {
   si = (session_info_t *)param;
   cmdLine = si->cmdString;
   numArgs = get_arg_count (cmdLine);
-  argCount = 0;
+  csfd = si->csfd;
 
   //The timeInfo is printed to the console for debugging/logging purposes.
   time (&rawTime);
@@ -55,8 +55,11 @@ void *command_switch (void *param) {
 
   if (numArgs >= MIN_NUM_ARGS) {
 
-    cmd = extract_cmd_string (cmdLine);
-    arg = extract_arg_string (cmdLine);
+    arg = separate_cmd_from_args (&cmdLine, numArgs);
+    cmd = cmdLine;
+
+    //cmd = extract_cmd_string (cmdLine);
+    //arg = extract_arg_string (cmdLine);
 
     fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
     fprintf (stderr, "\tInvoked Command <%s> with (%d) Argument(s) \"%s\"\n\n",
@@ -89,7 +92,7 @@ void *command_switch (void *param) {
 
 	//STRU <SP> <structure-code> <CRLF>
       } else if (strcmp (cmd, "STRU") == 0) {
-	cmd_stru (si, arg, argCount);
+	cmd_stru (si, arg, numArgs);
 
 	//MODE <SP> <mode-code> <CRLF>
       } else if (strcmp (cmd, "MODE") == 0) {
@@ -214,9 +217,6 @@ void *command_switch (void *param) {
       fprintf (stderr, "\tERROR: Command <%s> Unknown!\n", cmd);
       send_all (csfd, (uint8_t *)cmdNotFound, strlen (cmdNotFound));
     }
-
-    free (cmd);
-    free (arg);
 
   } else {
     fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);

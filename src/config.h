@@ -12,9 +12,9 @@
 
 
 //The name of the server configuration file.
-#define FTP_CONFIG_FILE "../config/ftp.conf"
+#define FTP_CONFIG_FILE "../conf/ftp.conf"
 //The name of the user configuration file.
-#define USER_CONFIG_FILE "../config/user.conf"
+#define USER_CONFIG_FILE "../conf/user.conf"
 
 
 /******************************************************************************
