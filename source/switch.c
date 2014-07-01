@@ -39,13 +39,14 @@ void *command_switch (void *param) {
   time_t rawTime;
   int argCount, numArgs;
   char *arg, *cmd, *cmdLine;
+  int csfd;
 
-  char *cmdUnrecognized = "500 - Syntax error, command unrecognized.\n",
-       *cmdUnimplemented = "502 - Command is not currently implemented.\n";
+  char *cmdNotFound = "500 - Syntax error, command unrecognized.\n";
+  char *cmdNotUsed = "502 - Command is not currently implemented.\n";
 
   si = (session_info_t *)param;
   cmdLine = si->cmdString;
-  numArgs = command_arg_count (cmdLine);
+  numArgs = get_arg_count (cmdLine);
   argCount = 0;
 
   //The timeInfo is printed to the console for debugging/logging purposes.
@@ -54,10 +55,12 @@ void *command_switch (void *param) {
 
   if (numArgs >= MIN_NUM_ARGS) {
 
-    cmd = command_extract_cmd (cmdLine);
-    arg = command_extract_arg (cmdLine);
+    cmd = extract_cmd_string (cmdLine);
+    arg = extract_arg_string (cmdLine);
 
-    fprintf(stderr, "%s\tUser <%s>\n\tInvoked Command <%s> with (%d) Argument(s) \"%s\"\n\n", asctime(timeInfo), si->user, cmd, (numArgs - 1), arg);
+    fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
+    fprintf (stderr, "\tInvoked Command <%s> with (%d) Argument(s) \"%s\"\n\n",
+	     cmd, (numArgs - 1), arg);
 
     if (strlen (cmd) == MAX_CMD_SIZE) {
       //USER <SP> <username> <CRLF>
@@ -125,16 +128,15 @@ void *command_switch (void *param) {
 	if (arg != NULL) {
 	  convert_to_upper (arg);
 	}
-
 	cmd_help (si, arg);
 
 	//NOOP <CRLF>
       } else if (strcmp (cmd, "NOOP") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//ACCT <SP> <account-information> <CRLF>
       } else if (strcmp (cmd, "ACCT") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//CDUP <CRLF>
       } else if (strcmp (cmd, "CDUP") == 0) {
@@ -142,47 +144,48 @@ void *command_switch (void *param) {
 
 	//SMNT <SP> <pathname> <CRLF>
       } else if (strcmp (cmd, "SMNT") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//REIN <CRLF>
       } else if (strcmp (cmd, "REIN") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//ALLO <SP> <decimal-integer> [<SP> R <SP> <decimal-integer>] <CRLF>
       } else if (strcmp (cmd, "ALLO") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//REST <SP> <marker> <CRLF>
       } else if (strcmp (cmd, "REST") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//RNFR <SP> <pathname> <CRLF>
       } else if (strcmp (cmd, "RNFR") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//RNTO <SP> <pathname> <CRLF>
       } else if (strcmp (cmd, "RNTO") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//ABOR <CRLF>
       } else if (strcmp (cmd, "ABOR") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//DELE <SP> <pathname> <CRLF>
       } else if (strcmp (cmd, "DELE") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//SITE <SP> <string> <CRLF>
       } else if (strcmp (cmd, "SITE") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//STAT [<SP> <pathname>] <CRLF>
       } else if (strcmp (cmd, "STAT") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
       } else {
-	fprintf (stderr, "%s\tUser <%s>\n\tERROR: Command <%s> Unknown!\n", asctime (timeInfo), si->user, cmd);
-	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+	fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
+	fprintf (stderr, "\tERROR: Command <%s> Unknown!\n", cmd);
+	send_all (csfd, (uint8_t *)cmdNotFound, strlen (cmdNotFound));
       }
 
     } else if (strlen (cmd) == MIN_CMD_SIZE) {
@@ -192,7 +195,7 @@ void *command_switch (void *param) {
 
 	//RMD <SP> <pathname> <CRLF>
       } else if (strcmp (cmd, "RMD") == 0) {
-    	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
 
 	//MKD <SP> <pathname> <CRLF>
       } else if (strcmp (cmd, "MKD") == 0) {
@@ -203,19 +206,21 @@ void *command_switch (void *param) {
 	cmd_pwd (si);
 
       } else {
-	send_all (si->csfd, (uint8_t *)cmdUnimplemented, strlen (cmdUnimplemented));
+	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
       }
 
     } else {
-      fprintf (stderr, "%s\tUser <%s>\n\tERROR: Command <%s> Unknown!\n", asctime (timeInfo), si->user, cmd);
-      send_all (si->csfd, (uint8_t *)cmdUnrecognized, strlen (cmdUnrecognized));
+      fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
+      fprintf (stderr, "\tERROR: Command <%s> Unknown!\n", cmd);
+      send_all (csfd, (uint8_t *)cmdNotFound, strlen (cmdNotFound));
     }
 
     free (cmd);
     free (arg);
 
   } else {
-    fprintf (stderr, "%s\tUser <%s>\n\tERROR: Missing Command/Insufficient Arguments!\n", asctime (timeInfo), si->user);
+    fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
+    fprintf (stderr, "\tERROR: Missing Command/Insufficient Arguments!\n");
   }
 
   si->cmdComplete = true;

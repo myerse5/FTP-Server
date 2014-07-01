@@ -19,10 +19,16 @@
 #define MIN_NUM_ARGS 2 
 
 
+//Local function prototypes.
+static char *strdup (const char *string);
+static void convert_to_upper (char *string);
+static void trim_whitespace (char *string);
+
+
 /******************************************************************************
  * command_arg_count - see "parser.h"
  *****************************************************************************/
-int command_arg_count (const char *cmdString)
+int get_arg_count (const char *cmdString)
 {
   int argCount = 0;
 
@@ -41,7 +47,7 @@ int command_arg_count (const char *cmdString)
 /******************************************************************************
  * command_extract_arg - see "parser.h"
  *****************************************************************************/
-char *command_extract_arg (const char *cmdString)
+char *extract_arg_string (const char *cmdString)
 {
   int argCount;
   int tempLen;
@@ -90,9 +96,9 @@ char *command_extract_arg (const char *cmdString)
 
 
 /******************************************************************************
- * command_extract_cmd - see "parser.h"
+ * extract_cmd_string - see "parser.h"
  *****************************************************************************/
-char *command_extract_cmd (const char *cmdString)
+char *extract_cmd_string (const char *cmdString)
 {
   char *command;
   char *tempString;
@@ -131,9 +137,12 @@ char *command_extract_cmd (const char *cmdString)
 
 
 /******************************************************************************
- * strdup - see "parser.h"
+ * Duplicate a string, and remove all leading/trailing whitespace from the
+ * returned copy of the string.
+ *
+ * Original author: James Yoo
  *****************************************************************************/
-char *strdup (const char *string)
+static char *strdup (const char *string)
 {
   char *duplicate;
   int strLen;
@@ -154,9 +163,11 @@ char *strdup (const char *string)
 
 
 /******************************************************************************
- * convert_to_upper - see "parser.h"
+ * Convert all lower case characters in a string to uppercase.
+ *
+ * Original author: James Yoo
  *****************************************************************************/
-void convert_to_upper (char *string)
+static void convert_to_upper (char *string)
 {
   int i;
 
@@ -167,9 +178,11 @@ void convert_to_upper (char *string)
 
 
 /******************************************************************************
- * trim_whitespace - see "parser.h"
+ * Remove any leading/trailing whitespace from a string.
+ *
+ * Original author: James Yoo
  *****************************************************************************/
-void trim_whitespace (char *string)
+static void trim_whitespace (char *string)
 {
   int length;
   char *head;

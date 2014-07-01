@@ -20,7 +20,7 @@
  *
  * Original author: James Yoo
  *****************************************************************************/
-int command_arg_count (const char *cmdString);
+int get_arg_count (const char *cmdString);
 
 
 /******************************************************************************
@@ -34,7 +34,7 @@ int command_arg_count (const char *cmdString);
  *
  * Original author: James Yoo
  *****************************************************************************/
-char *command_extract_arg (const char *cmdString);
+char *extract_arg_string (const char *cmdString);
 
 
 /******************************************************************************
@@ -48,32 +48,7 @@ char *command_extract_arg (const char *cmdString);
  *
  * Original author: James Yoo
  *****************************************************************************/
-char *command_extract_cmd (const char *cmdString);
-
-
-/******************************************************************************
- * Duplicate a string, and remove all leading/trailing whitespace from the
- * returned copy of the string.
- *
- * Original author: James Yoo
- *****************************************************************************/
-char *strdup (const char *string);
-
-
-/******************************************************************************
- * Convert all lower case characters in a string to uppercase.
- *
- * Original author: James Yoo
- *****************************************************************************/
-void convert_to_upper (char *string);
-
-
-/******************************************************************************
- * Remove any leading/trailing whitespace from a string.
- *
- * Original author: James Yoo
- *****************************************************************************/
-void trim_whitespace (char *string);
+char *extract_cmd_string (const char *cmdString);
 
 
 #endif //__PARSER_H__
