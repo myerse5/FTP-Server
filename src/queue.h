@@ -11,7 +11,7 @@
 #define __QUEUE_H__
 
 
-//TODO replace arbitrary values and consolidate.
+//TODO remove magic number.
 typedef struct node {
   char cmd[4096];
   struct node *next;
@@ -27,8 +27,6 @@ typedef struct node {
  *
  * Returns
  * 	Head of the queue.
- *
- * Original author: Justin Slind
  *****************************************************************************/
 queue* add_to_queue (char *commandstr, queue *cmdQueuePtr);
 
@@ -43,8 +41,6 @@ queue* add_to_queue (char *commandstr, queue *cmdQueuePtr);
  * Returns
  *   Queue* - The next command to be processed is returned.
  *   NULL - There was nothing in the queue to return.
- *
- * Original author: Justin Slind
  *****************************************************************************/
 queue* pull_from_queue (char *commandstr, queue *cmdQueuePtr);
 
@@ -54,8 +50,6 @@ queue* pull_from_queue (char *commandstr, queue *cmdQueuePtr);
  *
  * Arguments:
  *   cmdQueuePtr - Head of the queue.
- *
- * Original author: Justin Slind
  *****************************************************************************/
 void free_queue (queue *cmdQueuePtr);
 

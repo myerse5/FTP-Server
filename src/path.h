@@ -29,8 +29,6 @@
  *  false - The pathname is not valid.
  *
  * Commands which call this function: RETR
- *
- * Original author: Evan Myers
  *****************************************************************************/
 bool check_file_exist (const char *cwd, char *argpath);
 
@@ -55,8 +53,6 @@ bool check_file_exist (const char *cwd, char *argpath);
  *  false - The pathname is not valid.
  *
  * Commands which call this function: NLST, LIST, CWD
- *
- * Original author: Evan Myers
  *****************************************************************************/
 bool check_dir_exist (const char *cwd, char *argpath);
 
@@ -85,8 +81,6 @@ bool check_dir_exist (const char *cwd, char *argpath);
  *  -3 - The pathname is not unique.
  *
  * Commands which call this function: STOR, APPE, MKD, STRU
- *
- * Original author: Evan Myers
  *
  * note: argpath is not meant to be "const char *argpath"
  *****************************************************************************/

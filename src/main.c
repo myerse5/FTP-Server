@@ -110,9 +110,6 @@ char *rootdir;
 
 /******************************************************************************
  * main
- *
- * Original author: Justin Slind
- * Updated/rewritten by: Evan Myers
  *****************************************************************************/
 int main (int argc, char *argv[])
 {

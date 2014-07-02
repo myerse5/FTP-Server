@@ -22,9 +22,6 @@
  *
  * Arguments:
  *   param - The command received from the client on the control connection.
- *
- * Original author: James Yoo
- * Edited by: Evan Myers
  *****************************************************************************/
 void *command_switch (void *param);
 

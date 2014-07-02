@@ -19,8 +19,6 @@
 /******************************************************************************
  * Display a welcome message, connection information, and how to view a list
  * of commands on server startup.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int welcome_message (void);
 

@@ -84,8 +84,6 @@ void convert_to_upper (char *string)
 
 /******************************************************************************
  * Remove any leading/trailing whitespace from a string.
- *
- * Original author: James Yoo
  *****************************************************************************/
 static void trim_whitespace (char *string)
 {

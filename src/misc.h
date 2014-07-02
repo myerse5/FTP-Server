@@ -20,8 +20,6 @@
  * Arguments:
  *   si - info for current session
  *   arg - current command with parameter
- *
- * Original author: Justin Slind
  *****************************************************************************/
 void cmd_type (session_info_t *si, char *arg);
 
@@ -31,8 +29,6 @@ void cmd_type (session_info_t *si, char *arg);
  *
  * Arguments:
  *   arg - current command with parameter
- *
- * Original author: Justin Slind
  *****************************************************************************/
 void cmd_mode (session_info_t *si, char *arg);
 
@@ -42,8 +38,6 @@ void cmd_mode (session_info_t *si, char *arg);
  *
  * Arguments:
  *   si - The control thread session information.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 void cmd_syst (session_info_t *si);
 
@@ -55,8 +49,6 @@ void cmd_syst (session_info_t *si);
  *       si - The control thread session information.
  *      arg - The argument received from the client along with the STRU command.
  *  numArgs - The number of arguments to the command.
- *
- * Original author: James Yoo
  *****************************************************************************/
 void cmd_stru (session_info_t *si, char *arg, int numArgs);
 
@@ -66,8 +58,6 @@ void cmd_stru (session_info_t *si, char *arg, int numArgs);
  *
  * Arguments:
  *   si - The control thread session information.
- *
- * Original author: James Yoo
  *****************************************************************************/
 void cmd_quit (session_info_t *si);
 

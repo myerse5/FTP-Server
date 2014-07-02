@@ -370,8 +370,6 @@ int get_interface_address (const char *interface,
  * Return values:
  *    > 0   The file descriptor for the newly created data connection socket.
  *     -1   Error while creating the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 static int get_pasv_sock (const char *address, const char *port)
 {
@@ -519,8 +517,6 @@ int cmd_port (session_info_t *session, char *cmdStr)
  * Return values:
  *   0    The hostname and service strings have been successfully set.
  *  -1    Error, hostname and service strings are not set.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int get_port_address (int csfd,
 		      char (*address)[INET_ADDRSTRLEN], 
@@ -663,8 +659,6 @@ int get_port_address (int csfd,
  * Return values:
  *   >0    The socket file descriptor of the newly created data connection.
  *   -1    Error, the connection could not be made.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int port_connect (char *hostname, char *service)
 {

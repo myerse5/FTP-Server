@@ -26,9 +26,6 @@ extern pthread_mutex_t ctrlCountMutex; //Number of control connection threads.
  *
  * Arguments:
  *    arg - The control socket file descriptor.
- * 
- * Original author: Justin Slind
- * Updated by: Evan Myers
  *****************************************************************************/
 void *control_thread (void * arg);
 
@@ -46,8 +43,6 @@ void *control_thread (void * arg);
  * Return values:
  *   0    Success
  *  -1    Error (the mutex locking functions failed)
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int modify_cthread_count (int value);
 
@@ -60,8 +55,6 @@ int modify_cthread_count (int value);
  * Return values:
  *   >=0  The number of active control connection threads.
  *    <0  Error (the count was negative or the mutex locking functions failed)
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int get_cthread_count (void);
 

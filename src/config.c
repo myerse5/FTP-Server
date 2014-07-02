@@ -110,8 +110,6 @@ char *get_config_path (const char *filename)
  *    NULL - Error, the setting was not present in the configuration file, or
  *           there has been an error during a system call.
  *  string - The value of the setting found in the configuration file.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 static char *search_config (const char *target, const char *pathname)
 {

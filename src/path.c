@@ -302,8 +302,6 @@ static char *merge_absolute (const char *argpath, const int *reserve)
  *          'ftp.conf'.
  *   false - The pathname is not a descendant of the root directory.
  *
- * Original author: Evan Myers
- *
  * Regarding the trimmed argument:
  *   When canonicalize_file_name() is called, if any component of a pathname
  *   is not a file, it will return NULL and set errno appropriately. A function
@@ -367,8 +365,6 @@ static bool within_rootdir (char *fullpath, const char *trimmed)
  * Return values:
  *   true  - The file is a directory.
  *   false - The file is not a directory.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 bool is_a_dir (const char *fullpath)
 {
@@ -401,8 +397,6 @@ bool is_a_dir (const char *fullpath)
  *  NULL  - Error, or no filename was trimmed.
  *  char* - A string containing only the path to the filename
  *          (eg. argument to this function "/dir/file.c" returns "/dir/".
- *
- * Original author: Evan Myers
  *****************************************************************************/
 static char *trim_arg_path (char **argpath, int *reserve)
 {
@@ -461,8 +455,6 @@ static char *trim_arg_path (char **argpath, int *reserve)
  *  trimmed  - The filename that has been trimmed from the strings. This
  *             argument will be freed after the other arguments have been
  *             restored.
- * 
- * Original author: Evan Myers
  *****************************************************************************/
 static void restore_trimmed (char **argpath, char **fullpath, char *trimmed)
 {
@@ -484,8 +476,6 @@ static void restore_trimmed (char **argpath, char **fullpath, char *trimmed)
  *   0    The file does not exist
  *  -1    There was an error (NOT errno ENOENT) with the call to stat().
  *  -2    The file exists, a file created with fullpath would not be unique.
- *
- * Original author: Evan Myers
  *
  * Note: Special care must be taken when modifying this function. The function
  *       only returns 0 (a positive response) when the call to stat() fails

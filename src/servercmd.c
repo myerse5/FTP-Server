@@ -49,8 +49,6 @@ int welcome_message (void)
  * Return values:
  *   0    success
  *  -1    error
- *
- * Original author: Evan Myers
  *****************************************************************************/
 static int server_info (void)
 {
@@ -122,8 +120,6 @@ int read_server_cmd (void)
 
 /******************************************************************************
  * Display a list of server commands to the server operator.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 static void print_help (void)
 {

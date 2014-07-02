@@ -26,7 +26,7 @@ static int perm_neg_check (session_info_t *si, char *arg);
 static void store (session_info_t *si, char *cmd, char *purp);
 
 
-//TODO Consolidate and check this arbitrary value.
+//TODO Consolidate and check this (arbitrary?) value.
 #define BUFFSIZE 1000
 
 
@@ -111,9 +111,6 @@ void cmd_appe (session_info_t *si, char *cmd)
  *   cmd - current command with parameter
  *    si - info for current session
  *  purp - "purpose", a character to be used with fopen, write or append.
- *
- * Original author: Justin Slind
- * Updated by: Evan Myers
  *****************************************************************************/
 static void store (session_info_t *si, char *cmd, char *purp)
 {
@@ -349,8 +346,6 @@ void cmd_retr (session_info_t *si, char *path)
  * Return values:
  *   0    Accept the filename argument.
  *  -1    Reject the filename argument.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 static int perm_neg_check (session_info_t *si, char *arg)
 {

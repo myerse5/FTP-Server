@@ -57,8 +57,7 @@ int session (int csfd)
   
   commandstr[0] = '\0';
   
-  
-  
+
   //Check if the server is shutting down or if the quit cmd was received from
   //the client.
   while (!shutdownServer && !sessioninfo.cmdQuit) {
@@ -75,7 +74,6 @@ int session (int csfd)
       free_queue (cmdQueuePtr);
       return -1;
     }
-    
     
     //if there's anything to read on the control socket, do so.
     if (FD_ISSET (csfd, &rfds)) {

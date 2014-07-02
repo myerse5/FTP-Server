@@ -40,8 +40,6 @@
  *
  *   If NULL is returned, there was an error. View the standard error log for
  *   the cause of this error.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 char *get_config_value (const char *configSetting, const char *filename);
 
@@ -60,8 +58,6 @@ char *get_config_value (const char *configSetting, const char *filename);
  * Returns:
  *   A pointer to the absolute pathname string. If NULL is returned, there was
  *   an error, and the pathname could not be determined.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 char *get_config_path (const char *filename);
 

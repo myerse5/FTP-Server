@@ -31,16 +31,12 @@ char *separate_cmd_from_args (char **cmdLineStr, int numArgs);
  * must be removed before calling this function to receive an accurate count.
  *
  * Returns: The number of arguments found after a command.
- *
- * Original author: James Yoo
  *****************************************************************************/
 int get_arg_count (const char *cmdString);
 
 
 /******************************************************************************
  * Convert all lower case characters in a string to uppercase.
- *
- * Original author: James Yoo
  *****************************************************************************/
 void convert_to_upper (char *string);
 

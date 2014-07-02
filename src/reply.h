@@ -73,8 +73,6 @@ void send_mesg_214_specific (int csfd, char *syntax, char *info);
  * Return values:
  *    0   The message was successfully sent to the socket.
  *   -1   The entire message was not sent to the socket.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int send_mesg_227 (int csfd, int dsfd);
 

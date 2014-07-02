@@ -88,8 +88,6 @@ typedef struct {
  * Return values:
  *    0   success
  *   -1   error
- *
- * Original author: Justin Slind
  *****************************************************************************/
 int session (int csfd);
 
@@ -105,8 +103,6 @@ int session (int csfd);
  * Return values:
  *    0   success
  *   -1   error
- *
- * Original author: Justin Slind
  *****************************************************************************/
 int read_cmd (char *str, int sock, session_info_t *si);
 

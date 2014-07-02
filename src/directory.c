@@ -96,9 +96,6 @@ void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
  *        si - A pointer to the session information maintained by session().
  *   argpath - The filename argument received with the list or nlist command.
  *    detail - Set to true if a detailed listing was requested.
- *
- * Original Author: Alex Tai
- * Rewritten by: Evan Myers
  *****************************************************************************/
 static void list_directory (session_info_t *si, char * fullpath, bool detail)
 {
@@ -205,9 +202,6 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
  * Return values:
  *   0  Success
  *  -1  Error
- *
- * Original Author: Alex Tai
- * Rewritten by: Evan Myers
  *****************************************************************************/
 static int detail_list (struct dirent *dirInfo, char *fullpath, char **output)
 {

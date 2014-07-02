@@ -117,9 +117,6 @@ void cmd_pass (session_info_t *si, char *arg)
  *   user - The currently logged in username.
  *   password - The argument given with the PASS command.
  *   md5str - The string to contain the md5 string.
- *
- * Original author: Justin Slind
- * Updated by: Evan Myers
  *****************************************************************************/
 static void get_md5 (char *user, char *pass, char *md5str)
 {

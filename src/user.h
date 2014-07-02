@@ -17,9 +17,6 @@
  * Arguments:
  *    si - Info for the current session.
  *   arg - The username argument.
- *
- * Original author: Justin Slind
- * Updated by: Evan Myers
  *****************************************************************************/
 void cmd_user (session_info_t *si, char *arg);
 
@@ -34,8 +31,6 @@ void cmd_user (session_info_t *si, char *arg);
  * Arguments:
  *    si - Info for the current session.
  *   arg - The password argument.
- *
- * Original author: Justin Slind
  *****************************************************************************/
 void cmd_pass (session_info_t *si, char *cmd);
 

@@ -50,8 +50,6 @@
  *   >0   The socket file descriptor ready to accept() a control connection 
  *        any/all clients.
  *   -1   Error
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int get_control_sock (void);
 
@@ -108,8 +106,6 @@ int get_control_sock (void);
  *      This value may be returned when the function passed the mode
  *      ACCEPT_CONTROL as the second argument. This value is returned when
  *      there is input to read on stdin. 
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int accept_connection (int sfd, int mode, session_info_t *si);
 
@@ -130,8 +126,6 @@ int accept_connection (int sfd, int mode, session_info_t *si);
  * Return values:
  *  >0    The socket file descriptor of the data connection socket.
  *  -1    Error, the socket could not be created.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int cmd_pasv (session_info_t *session);
 
@@ -153,8 +147,6 @@ int cmd_pasv (session_info_t *session);
  *        set in the string passed in the second argument.
  *        argument.
  *  -1    Error, the address has not been set in the second argument. 
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int get_interface_address (const char *interface,
 			   char (*address)[INET_ADDRSTRLEN]);
@@ -171,8 +163,6 @@ int get_interface_address (const char *interface,
  * Return values:
  *   >0   The socket file descriptor of the data connection socket.
  *   -1   Error, the data connection could not be created.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int cmd_port (session_info_t *session, char *cmdStr);
 
@@ -189,8 +179,6 @@ int cmd_port (session_info_t *session, char *cmdStr);
  * Return values:
  *   0    The full message was successfully sent.
  *  -1    Error, the message was not sent in full.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 int send_all (int sfd, uint8_t *mesg, int toSend);
 

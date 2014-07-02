@@ -24,8 +24,6 @@
  *   si - Contains the session information for the current client.
  *  arg - The command that help is requested for. This value may be NULL in
  *        which case a list of commands will be printed.
- *
- * Original author: James Yoo
  *****************************************************************************/
 void cmd_help (session_info_t *si, char *arg);
 

@@ -24,8 +24,6 @@
  * Note: This function will store the unique name to the current working
  *       directory and not any other path argument. This is intended, we were
  *       following "RFC 959".
- *
- * Original author: Justin Slind
  *****************************************************************************/
 void cmd_stou (session_info_t *si, char *arg);
 
@@ -35,8 +33,6 @@ void cmd_stou (session_info_t *si, char *arg);
  * Arguments:
  *    si - Info for current session.
  *   cmd - The filename argument.
- *
- * Original author: Justin Slind
  *****************************************************************************/
 void cmd_stor (session_info_t *si, char *cmd);
 
@@ -46,8 +42,6 @@ void cmd_stor (session_info_t *si, char *cmd);
  * Arguments:
  *    si - info for current session
  *   cmd - current command with parameter
- *
- * Original author: Justin Slind
  *****************************************************************************/
 void cmd_appe (session_info_t *si, char *cmd);
 
@@ -57,9 +51,6 @@ void cmd_appe (session_info_t *si, char *cmd);
  * Arguments:
  *     si - The session information.
  *   path - An absolute path, or relative filename to be retrieved.
- *
- * Original author: James Yoo
- * Rewritten by: Evan Myers
  *****************************************************************************/
 void cmd_retr (session_info_t *si, char *path);
 
@@ -76,8 +67,6 @@ void cmd_retr (session_info_t *si, char *path);
  *        opened.
  *   errcode - The type of error. This should be set to zero if no error
  *             has occurred (a clean exit from the caller function).
- *
- * Original author: Evan Myers
  *****************************************************************************/
 void cleanup_stor_recv (session_info_t *si, FILE *fp, int errcode);
 

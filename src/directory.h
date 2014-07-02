@@ -10,9 +10,6 @@
 #define __DIRECTORY_H__
 
 
-#include <dirent.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include "session.h" //Required for session_info_t in function prototype.
 
 
@@ -27,9 +24,6 @@
  *        si - A pointer to the session information maintained by session().
  *   argpath - The filename argument received with the list or nlist command.
  *    detail - Set to true if a detailed listing was requested.
- *
- * Original author: Alex Tai
- * Rewritten by: Evan Myers
  *****************************************************************************/
 void cmd_list_nlst (session_info_t *si, char *argpath, bool detail);
 
@@ -41,9 +35,6 @@ void cmd_list_nlst (session_info_t *si, char *argpath, bool detail);
  *        si - A pointer to the session information maintained by session().
  *  filepath - The filename argument supplied with the mkdir command received
  *             from the client.
- * 
- * Original author: Alex Tai
- * Checked by: Evan Myers
  *****************************************************************************/
 void cmd_mkd (session_info_t *si, char *filepath);
 
@@ -55,9 +46,6 @@ void cmd_mkd (session_info_t *si, char *filepath);
  * Argument:
  *   si  - The command thread session information.
  *   arg - The command is rejected if this argument is not NULL.
- * 
- * Original author: Evan Myers
- * Checked by: Alex Tai
  *****************************************************************************/
 void cmd_cdup (session_info_t *si, char *arg);
 
@@ -68,9 +56,6 @@ void cmd_cdup (session_info_t *si, char *arg);
  * Argument:
  *   si  - The command thread session information.
  *   arg - Change the current working directory to this path if accepted.
- * 
- * Original author: Alex tai
- * Changed by: Evan Myers - using code written by James Yoo and Justin Slind
  *****************************************************************************/
 void cmd_cwd (session_info_t *si, char *arg);
 
@@ -80,8 +65,6 @@ void cmd_cwd (session_info_t *si, char *arg);
  *
  * Argument:
  *   si - The command thread session information.
- *
- * Original author: Evan Myers
  *****************************************************************************/
 void cmd_pwd (session_info_t *si);
 
