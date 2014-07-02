@@ -1,6 +1,6 @@
 /******************************************************************************
- * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * FTP-Server
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * Date: November 2013
  *
  * Description:
@@ -52,8 +52,8 @@ void send_mesg_214_specific (int csfd, char *syntax, char *info);
 
 
 /******************************************************************************
- * This function generates a positive response message for the PASV command
- * as specified in 'RFC 959'.
+ * Generates a positive response message for the PASV command as specified in
+ * 'RFC 959'.
  *
  * Create the PASV command response message, then send the feedback to the
  * client on the control connection. The response will be sent in the following
@@ -90,36 +90,42 @@ int send_mesg_451 (int csfd);
 
 
 /******************************************************************************
- * This function generates a negative response message for when the command
+ * Generates a negative response message for when the command was not found.
  *****************************************************************************/
 int send_mesg_500 (int csfd);
 
 
 /******************************************************************************
- * This function generates a negative response message for when errors have
- * been detected in the argument of a command.
+ * Generates a negative response message for when errors have been detected in
+ * the argument of a command.
  *****************************************************************************/
 int send_mesg_501 (int csfd);
 
 
 /******************************************************************************
- * This function generates a negative response message for when the client has
- * entered a command which requires the client to be logged in, but this
- * requirement has not been met.
+ * Generates a negative response message for when a command has not been
+ * implemented.
+ *****************************************************************************/
+int send_mesg_502 (int csfd);
+
+/******************************************************************************
+ * Generates a negative response message for when the client has entered a
+ * command which requires the client to be logged in, but this requirement has
+ * not been met.
  *****************************************************************************/
 int send_mesg_530 (int csfd);
 
 
 /******************************************************************************
- * This function generates a negative response message for when a file cannot
- * be processed due to a lack of permissions.
+ * Generates a negative response message for when a file cannot be processed
+ * due to a lack of permissions.
  *****************************************************************************/
 int send_mesg_550 (int csfd);
 
 
 /******************************************************************************
- * This function generates a negative response message for when the pathname
- * of a file argument is not allowed.
+ * Generates a negative response message for when the pathname of a file
+ * argument is not allowed.
  *****************************************************************************/
 int send_mesg_553 (int csfd);
 

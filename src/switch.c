@@ -1,6 +1,6 @@
 /******************************************************************************
- * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * FTP-Server
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * Date: November 2013
  *
  * Description:
@@ -19,14 +19,14 @@
 #include "parser.h"
 #include "switch.h"
 #include "directory.h"
+#include "log.h"
 #include "net.h"
+#include "reply.h"
 #include "session.h"
 #include "user.h"
 
 
-//Preprocessor Macro Define(s)
-#define MAX_CMD_SIZE 4    //Maximum allowed length of a command.
-#define MIN_CMD_SIZE 3    //Minimum allowed length of a command.
+//Ensure a command has been sent (not an empty line).
 #define MIN_NUM_ARGS 1    //Minimum allowed number of arguments.
 
 
@@ -34,193 +34,165 @@
  * command_switch - see "switch.h"
  *****************************************************************************/
 void *command_switch (void *param) {
-  session_info_t *si;
-  struct tm *timeInfo;
-  time_t rawTime;
-  int numArgs;
-  char *arg, *cmd, *cmdLine;
-  int csfd;
-
-  char *cmdNotFound = "500 - Syntax error, command unrecognized.\n";
-  char *cmdNotUsed = "502 - Command is not currently implemented.\n";
+  session_info_t *si;  //The data for this session (sockets, user, etc.)
+  char *cmdLine;       //The full command received from the client on the csfd.
+  char *cmd;           //The requested command.
+  char *arg;           //The argument to use with the command.
+  int numArgs;         //The number of tokens in the variable 'cmdLine'.
+  int csfd;            //Control socket file descriptor.
 
   si = (session_info_t *)param;
   cmdLine = si->cmdString;
   numArgs = get_arg_count (cmdLine);
   csfd = si->csfd;
 
-  //The timeInfo is printed to the console for debugging/logging purposes.
-  time (&rawTime);
-  timeInfo = localtime (&rawTime);
+  if (numArgs < MIN_NUM_ARGS) {
+    log_received_cmd (si->user, NULL, NULL, 0);
+    send_mesg_500 (csfd);
+    si->cmdComplete = true;
+    return NULL;
+  }
 
-  if (numArgs >= MIN_NUM_ARGS) {
+  arg = separate_cmd_from_args (&cmdLine, numArgs);
+  cmd = cmdLine;
+  log_received_cmd (si->user, cmd, arg, numArgs);
 
-    arg = separate_cmd_from_args (&cmdLine, numArgs);
-    cmd = cmdLine;
+  //APPE <SP> <pathname> <CRLF>
+  if (strcmp (cmd, "APPE") == 0) {
+    cmd_appe (si, arg);
 
-    //cmd = extract_cmd_string (cmdLine);
-    //arg = extract_arg_string (cmdLine);
+    //CDUP <CRLF>
+  } else if (strcmp (cmd, "CDUP") == 0) {
+    cmd_cdup (si, arg);
 
-    fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
-    fprintf (stderr, "\tInvoked Command <%s> with (%d) Argument(s) \"%s\"\n\n",
-	     cmd, (numArgs - 1), arg);
+    //CWD <SP> <pathname> <CRLF>   
+  } else if (strcmp (cmd, "CWD") == 0) {
+    cmd_cwd (si, arg);
 
-    if (strlen (cmd) == MAX_CMD_SIZE) {
-      //USER <SP> <username> <CRLF>
-      if (strcmp (cmd, "USER") == 0) {
-	cmd_user (si, arg);
+    //HELP [<SP> <string>] <CRLF>
+  } else if (strcmp (cmd, "HELP") == 0) {
+    if (arg != NULL)
+      convert_to_upper (arg);
+    cmd_help (si, arg);
 
-	//PASS <SP> <password> <CRLF>
-      } else if (strcmp (cmd, "PASS") == 0) {
-	cmd_pass (si, arg);
+    //LIST [<SP> <pathname>] <CRLF>
+  } else if (strcmp (cmd, "LIST") == 0) {
+    cmd_list_nlst (si, arg, true);
 
-	//QUIT <CRLF>
-      } else if (strcmp (cmd, "QUIT") == 0) {
-	cmd_quit (si);
+    //MKD <SP> <pathname> <CRLF>
+  } else if (strcmp (cmd, "MKD") == 0) {
+    cmd_mkd (si, arg);
 
-	//PORT <SP> <host-port> <CRLF>
-      } else if (strcmp (cmd, "PORT") == 0) {
-	cmd_port (si, arg);
+    //MODE <SP> <mode-code> <CRLF>
+  } else if (strcmp (cmd, "MODE") == 0) {
+    cmd_mode (si, arg);
 
-	//PASV <CRLF>
-      } else if (strcmp (cmd, "PASV") == 0) {
-	cmd_pasv (si);
+    //NLST [<SP> <pathname>] <CRLF>
+  } else if (strcmp (cmd, "NLST") == 0) {
+    cmd_list_nlst (si, arg, false);
 
-	//TYPE <SP> <type-code> <CRLF>
-      } else if (strcmp (cmd, "TYPE") == 0) {
-	cmd_type (si, arg);
+    //PASS <SP> <password> <CRLF>
+  } else if (strcmp (cmd, "PASS") == 0) {
+    cmd_pass (si, arg);
 
-	//STRU <SP> <structure-code> <CRLF>
-      } else if (strcmp (cmd, "STRU") == 0) {
-	cmd_stru (si, arg, numArgs);
+    //PASV <CRLF>
+  } else if (strcmp (cmd, "PASV") == 0) {
+    cmd_pasv (si);
 
-	//MODE <SP> <mode-code> <CRLF>
-      } else if (strcmp (cmd, "MODE") == 0) {
-    	cmd_mode (si, arg);
+    //PORT <SP> <host-port> <CRLF>
+  } else if (strcmp (cmd, "PORT") == 0) {
+    cmd_port (si, arg);
 
-	//RETR <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "RETR") == 0) {
-    	cmd_retr (si, arg);
+    //PWD <CRLF>
+  } else if (strcmp (cmd, "PWD") == 0) {
+    cmd_pwd (si);
 
-	//STOR <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "STOR") == 0) {
-    	cmd_stor (si, arg);
+    //QUIT <CRLF>
+  } else if (strcmp (cmd, "QUIT") == 0) {
+    cmd_quit (si);
 
-	//STOU <CRLF>
-      } else if (strcmp (cmd, "STOU") == 0) {
-	cmd_stou (si, arg);
+    //RETR <SP> <pathname> <CRLF>
+  } else if (strcmp (cmd, "RETR") == 0) {
+    cmd_retr (si, arg);
 
-	//APPE <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "APPE") == 0) {
-	cmd_appe (si, arg);
+    //STOR <SP> <pathname> <CRLF>
+  } else if (strcmp (cmd, "STOR") == 0) {
+    cmd_stor (si, arg);
 
-	//LIST [<SP> <pathname>] <CRLF>
-      } else if (strcmp (cmd, "LIST") == 0) {
-	cmd_list_nlst (si, arg, true);
+    //STOU <CRLF>
+  } else if (strcmp (cmd, "STOU") == 0) {
+    cmd_stou (si, arg);
 
-	//NLST [<SP> <pathname>] <CRLF>
-      } else if (strcmp (cmd, "NLST") == 0) {
-	cmd_list_nlst (si, arg, false);
+    //STRU <SP> <structure-code> <CRLF>
+  } else if (strcmp (cmd, "STRU") == 0) {
+    cmd_stru (si, arg, numArgs);
 
-	//SYST <CRLF>
-      } else if (strcmp (cmd, "SYST") == 0) {
-	cmd_syst (si);
+    //SYST <CRLF>
+  } else if (strcmp (cmd, "SYST") == 0) {
+    cmd_syst (si);
 
-	//HELP [<SP> <string>] <CRLF>
-      } else if (strcmp (cmd, "HELP") == 0) {
-	if (arg != NULL) {
-	  convert_to_upper (arg);
-	}
-	cmd_help (si, arg);
+    //TYPE <SP> <type-code> <CRLF>
+  } else if (strcmp (cmd, "TYPE") == 0) {
+    cmd_type (si, arg);
 
-	//NOOP <CRLF>
-      } else if (strcmp (cmd, "NOOP") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //USER <SP> <username> <CRLF>
+  } else if (strcmp (cmd, "USER") == 0) {
+    cmd_user (si, arg);
 
-	//ACCT <SP> <account-information> <CRLF>
-      } else if (strcmp (cmd, "ACCT") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //ABOR <CRLF>
+  } else if (strcmp (cmd, "ABOR") == 0) {
+    send_mesg_502 (csfd);
 
-	//CDUP <CRLF>
-      } else if (strcmp (cmd, "CDUP") == 0) {
-	cmd_cdup (si, arg);
+    //ACCT <SP> <account-information> <CRLF>
+  } else if (strcmp (cmd, "ACCT") == 0) {
+    send_mesg_502 (csfd);
 
-	//SMNT <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "SMNT") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //ALLO <SP> <decimal-integer> [<SP> R <SP> <decimal-integer>] <CRLF>
+  } else if (strcmp (cmd, "ALLO") == 0) {
+    send_mesg_502 (csfd);
 
-	//REIN <CRLF>
-      } else if (strcmp (cmd, "REIN") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //DELE <SP> <pathname> <CRLF>
+  } else if (strcmp (cmd, "DELE") == 0) {
+    send_mesg_502 (csfd);
 
-	//ALLO <SP> <decimal-integer> [<SP> R <SP> <decimal-integer>] <CRLF>
-      } else if (strcmp (cmd, "ALLO") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //NOOP <CRLF>
+  } else if (strcmp (cmd, "NOOP") == 0) {
+    send_mesg_502 (csfd);
 
-	//REST <SP> <marker> <CRLF>
-      } else if (strcmp (cmd, "REST") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //REIN <CRLF>
+  } else if (strcmp (cmd, "REIN") == 0) {
+    send_mesg_502 (csfd);
 
-	//RNFR <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "RNFR") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //REST <SP> <marker> <CRLF>
+  } else if (strcmp (cmd, "REST") == 0) {
+    send_mesg_502 (csfd);
 
-	//RNTO <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "RNTO") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //RMD <SP> <pathname> <CRLF>
+  } else if (strcmp (cmd, "RMD") == 0) {
+    send_mesg_502 (csfd);
 
-	//ABOR <CRLF>
-      } else if (strcmp (cmd, "ABOR") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //RNFR <SP> <pathname> <CRLF>
+  } else if (strcmp (cmd, "RNFR") == 0) {
+    send_mesg_502 (csfd);
 
-	//DELE <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "DELE") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //RNTO <SP> <pathname> <CRLF>
+  } else if (strcmp (cmd, "RNTO") == 0) {
+    send_mesg_502 (csfd);
 
-	//SITE <SP> <string> <CRLF>
-      } else if (strcmp (cmd, "SITE") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //SITE <SP> <string> <CRLF>
+  } else if (strcmp (cmd, "SITE") == 0) {
+    send_mesg_502 (csfd);
 
-	//STAT [<SP> <pathname>] <CRLF>
-      } else if (strcmp (cmd, "STAT") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
+    //SMNT <SP> <pathname> <CRLF>
+  } else if (strcmp (cmd, "SMNT") == 0) {
+    send_mesg_502 (csfd);
 
-      } else {
-	fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
-	fprintf (stderr, "\tERROR: Command <%s> Unknown!\n", cmd);
-	send_all (csfd, (uint8_t *)cmdNotFound, strlen (cmdNotFound));
-      }
-
-    } else if (strlen (cmd) == MIN_CMD_SIZE) {
-      //CWD <SP> <pathname> <CRLF>
-      if (strcmp (cmd, "CWD") == 0) {
-	cmd_cwd (si, arg);
-
-	//RMD <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "RMD") == 0) {
-    	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
-
-	//MKD <SP> <pathname> <CRLF>
-      } else if (strcmp (cmd, "MKD") == 0) {
-	cmd_mkd (si, arg);
-
-	//PWD <CRLF>
-      } else if (strcmp (cmd, "PWD") == 0) {
-	cmd_pwd (si);
-
-      } else {
-	send_all (csfd, (uint8_t *)cmdNotUsed, strlen (cmdNotUsed));
-      }
-
-    } else {
-      fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
-      fprintf (stderr, "\tERROR: Command <%s> Unknown!\n", cmd);
-      send_all (csfd, (uint8_t *)cmdNotFound, strlen (cmdNotFound));
-    }
+    //STAT [<SP> <pathname>] <CRLF>
+  } else if (strcmp (cmd, "STAT") == 0) {
+    send_mesg_502 (csfd);
 
   } else {
-    fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), si->user);
-    fprintf (stderr, "\tERROR: Missing Command/Insufficient Arguments!\n");
+    send_mesg_500 (csfd);
   }
 
   si->cmdComplete = true;

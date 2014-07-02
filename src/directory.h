@@ -1,6 +1,6 @@
 /******************************************************************************
- * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * FTP-Server
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * Date: November 2013
  * 
  * Description:

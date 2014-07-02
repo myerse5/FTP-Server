@@ -1,6 +1,6 @@
 /******************************************************************************
- * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * FTP-Server
+ * Authors: Evan Myers, Justin Slind, Alex Tai, James Yoo
  * Date: November 2013
  *
  * Description: 
@@ -204,6 +204,23 @@ int send_mesg_500 (int csfd)
 int send_mesg_501 (int csfd)
 {
   uint8_t mesg[] = "501 Syntax error in parameters or arguments.\n";
+  int mesgLen;
+
+  //Send the complete response message.
+  mesgLen = strlen ((char *)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_502 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_502 (int csfd)
+{
+  uint8_t mesg[] = "502 - Command is not currently implemented.\n";
   int mesgLen;
 
   //Send the complete response message.
