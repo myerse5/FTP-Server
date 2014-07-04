@@ -18,7 +18,7 @@
 #include "user.h"
 
 
-//Local function prototypes.
+// Local function prototypes.
 static void get_md5 (char *user, char *password, char *md5str);
 
 
@@ -122,16 +122,16 @@ static void get_md5 (char *user, char *pass, char *md5str)
   byte_t md5checksum[16];
   struct md5CTX md5struct;
 
-  //Salt the password with the username before creating the checksum.
+  // Salt the password with the username before creating the checksum.
   strcpy (data, pass);
   strcat (data, user);
 
-  //Build the checksum.
+  // Build the checksum.
   md5Start (&md5struct);
   md5Add (&md5struct, (byte_t*)data, strlen (data));
   md5End (&md5struct, md5checksum);
 
-  //Create the checksum string.
+  // Create the checksum string.
   for(int i = 0; i < 16; ++i)
     sprintf (&md5str[i*2], "%02x", (unsigned int)md5checksum[i]);
 }

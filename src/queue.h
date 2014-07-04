@@ -11,7 +11,7 @@
 #define __QUEUE_H__
 
 
-//TODO remove magic number.
+// TODO remove magic number.
 typedef struct node {
   char cmd[4096];
   struct node *next;
@@ -54,4 +54,4 @@ queue* pull_from_queue (char *commandstr, queue *cmdQueuePtr);
 void free_queue (queue *cmdQueuePtr);
 
 
-#endif //__QUEUE_H__
+#endif // __QUEUE_H__

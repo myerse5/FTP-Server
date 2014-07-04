@@ -12,9 +12,9 @@
 #define __CTRLTHREAD_H__
 
 
-//Defined in "main.c"
-extern int activeControlThreads;       //Used to lock active_control_threads.
-extern pthread_mutex_t ctrlCountMutex; //Number of control connection threads.
+// Defined in "main.c"
+extern int activeControlThreads;       // Used to lock active_control_threads.
+extern pthread_mutex_t ctrlCountMutex; // Number of control connection threads.
 
 
 /******************************************************************************
@@ -59,4 +59,4 @@ int modify_cthread_count (int value);
 int get_cthread_count (void);
 
 
-#endif //__CTRLTHREAD_H__
+#endif // __CTRLTHREAD_H__

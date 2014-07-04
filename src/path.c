@@ -21,10 +21,10 @@
 #include "session.h"
 
 
-extern char *rootdir;  //defined in the file 'main.c'
+extern char *rootdir;  // defined in the file 'main.c'
 
 
-//Local function prototypes.
+// Local function prototypes.
 static char *merge_absolute (const char *argpath, const int *reserve);
 static bool within_rootdir (char *fullpath, const char *trimmed);
 static bool is_a_dir (const char *fullpath);
@@ -40,11 +40,11 @@ bool check_file_exist (const char *cwd, char *argpath)
 {
   char *fullpath;
 
-  //Merge all parts of the pathname to create a single pathname.
+  // Merge all parts of the pathname to create a single pathname.
   if ((fullpath = merge_paths (cwd, argpath, NULL)) == NULL)
     return false;
 
-  //Ensure the pathname is a descendant of the servers root directory.
+  // Ensure the pathname is a descendant of the servers root directory.
   if (!within_rootdir (fullpath, NULL)) {
     free (fullpath);
     return false;
@@ -62,17 +62,17 @@ bool check_dir_exist (const char *cwd, char *argpath)
 {
   char *fullpath;
 
-  //Merge all parts of the pathname to create a single pathname.
+  // Merge all parts of the pathname to create a single pathname.
   if ((fullpath = merge_paths (cwd, argpath, NULL)) == NULL)
     return false;
 
-  //Determine if the pathname is a descendant of the servers root directory.
+  // Determine if the pathname is a descendant of the servers root directory.
   if (!within_rootdir (fullpath, NULL)) {
     free (fullpath);
     return false;
   }
 
-  //Determine if the pathname is for a directory.
+  // Determine if the pathname is for a directory.
   if (!is_a_dir (fullpath)) {
     free (fullpath);
     return false;
@@ -105,7 +105,7 @@ int check_future_file (const char *cwd, char *argpath, bool unique)
     return -2;
   }
 
-  //Trimmed is freed in this function call.
+  // Trimmed is freed in this function call.
   restore_trimmed (&argpath, &fullpath, trimmed);
 
   /* Check if the file is unique when requested in the third argument to this
@@ -140,11 +140,11 @@ int check_future_file (const char *cwd, char *argpath, bool unique)
  *****************************************************************************/
 char *merge_paths (const char *cwd, char *argpath, const int *reserve)
 {
- //Concatenate the rootdir, cwd, and path argument relevant to the cwd.
+ // Concatenate the rootdir, cwd, and path argument relevant to the cwd.
   char *fullpath;
   char *start;
 
-  //String lengths required to malloc the fullpath string.
+  // String lengths required to malloc the fullpath string.
   int rootdirStrlen;
   int cwdStrlen;
   int argStrlen;
@@ -171,7 +171,7 @@ char *merge_paths (const char *cwd, char *argpath, const int *reserve)
   }
 
 
-  //Merge the absolute path. Proceed if the path is not absolute.
+  // Merge the absolute path. Proceed if the path is not absolute.
   if ((fullpath = merge_absolute (argpath, reserve)) != NULL)
     return fullpath;
 
@@ -187,9 +187,9 @@ char *merge_paths (const char *cwd, char *argpath, const int *reserve)
   rootdirStrlen = strlen (rootdir) + 1;
   cwdStrlen = strlen (cwd) + 1;
 
-  //Additional string length calculations for a "trimmed" pathname.
+  // Additional string length calculations for a "trimmed" pathname.
   if (argpath == NULL) {
-    if (reserve == NULL) { //Always malloc() the space requested in reserve.
+    if (reserve == NULL) { // Always malloc() the space requested in reserve.
       argStrlen = 0;
     } else {
       argStrlen = 0 + *reserve;
@@ -208,7 +208,7 @@ char *merge_paths (const char *cwd, char *argpath, const int *reserve)
     return NULL;
   }
 
-  //Create the complete pathname argument. 
+  // Create the complete pathname argument. 
   strcpy (fullpath, rootdir);
   strcat (fullpath, cwd);
   if (argpath != NULL)
@@ -240,17 +240,17 @@ char *merge_paths (const char *cwd, char *argpath, const int *reserve)
  *****************************************************************************/
 static char *merge_absolute (const char *argpath, const int *reserve)
 {
-  char *fullpath;     //Concatenate the rootdir and the absolute path argument.
+  char *fullpath;     // Concatenate the rootdir and the absolute path argument.
   int rootdirStrlen;
   int argpathStrlen;
   int pathSize;
 
-  //Do not attempt to merge rootdir with NULL, the merge is rootdir.
+  // Do not attempt to merge rootdir with NULL, the merge is rootdir.
   if (argpath == NULL)
     return NULL;
 
 
-  //When the path does not begin with '/', it is not absolute.
+  // When the path does not begin with '/', it is not absolute.
   if (argpath[0] != '/')
     return NULL;
 
@@ -263,7 +263,7 @@ static char *merge_absolute (const char *argpath, const int *reserve)
   if (reserve != NULL)
     argpathStrlen += *reserve;
 
-  pathSize = argpathStrlen + rootdirStrlen + 1; //+1 for null terminator.
+  pathSize = argpathStrlen + rootdirStrlen + 1; // +1 for null terminator.
 
 
   if ((fullpath = malloc (pathSize * sizeof (*fullpath))) == NULL) {
@@ -273,7 +273,7 @@ static char *merge_absolute (const char *argpath, const int *reserve)
   }
 
   *fullpath = '\0';
-  //Concatenate the absolute path to the argument.
+  // Concatenate the absolute path to the argument.
   strcat (fullpath, rootdir);
   strcat (fullpath, argpath);
 
@@ -320,17 +320,17 @@ static char *merge_absolute (const char *argpath, const int *reserve)
  *****************************************************************************/
 static bool within_rootdir (char *fullpath, const char *trimmed)
 {
-  char *canon;       //An abbreviation of canonicalized absolute pathname.
-  char *str;         //Return value of strcat function.
+  char *canon;       // An abbreviation of canonicalized absolute pathname.
+  char *str;         // Return value of strcat function.
 
-  //Resolve all "..", ".", and duplicate '/' entries. Resolve symbolic links.
+  // Resolve all "..", ".", and duplicate '/' entries. Resolve symbolic links.
   if ((canon = canonicalize_file_name (fullpath)) == NULL) {
     fprintf (stderr, "%s: canonicalize_file_name: %s\n", __FUNCTION__, 
 	     strerror (errno));
     return false;
   }
 
-  //Determine if the pathname is a descendant of the servers root directory.
+  // Determine if the pathname is a descendant of the servers root directory.
   if (strstr (canon, rootdir) == NULL) {
     /* This if statement handles a very special case. See the notes in the
      * function header. Restore the trimmed filename and call this function
@@ -368,14 +368,14 @@ static bool within_rootdir (char *fullpath, const char *trimmed)
  *****************************************************************************/
 bool is_a_dir (const char *fullpath)
 {
-  struct stat st;  //Used to check if the file at pathname is a directory.
+  struct stat st;  // Used to check if the file at pathname is a directory.
 
-  //stat() the file to determine if the file is a directory.
+  // stat() the file to determine if the file is a directory.
   if (stat (fullpath, &st) == -1) {
     return false;
   }
 
-  //Determine if the file is a directory. See man (2) stat, line 120.
+  // Determine if the file is a directory. See man (2) stat, line 120.
   if (!(st.st_mode & S_IFDIR)) {
     return false;
   }
@@ -399,15 +399,15 @@ bool is_a_dir (const char *fullpath)
  *****************************************************************************/
 static char *trim_arg_path (char **argpath, int *reserve)
 {
-  char *trimFilename = NULL;//Store the trimmed portion of the filename.
-  char *str;                //Used to collect the filename from the prefix path.
+  char *trimFilename = NULL;// Store the trimmed portion of the filename.
+  char *str;                // Used to collect the filename from the prefix path
 
-  //Determine if the argument contains a pathname prefix.
+  // Determine if the argument contains a pathname prefix.
   if ((str = strrchr (*argpath, '/')) != NULL) {
-    if (strlen (*argpath) > 1) //required when the pathname argument is "/".
-      str++;                //Do not include the '/' prefix in the new filename.
+    if (strlen (*argpath) > 1) // required when the pathname argument is "/".
+      str++;                // Do not include the '/' prefix in the new filename
   } else {
-    //The filename does not include a path prefix (eg. no '/' is present).
+    // The filename does not include a path prefix (eg. no '/' is present).
     str = *argpath;
   }
 
@@ -417,13 +417,13 @@ static char *trim_arg_path (char **argpath, int *reserve)
   if (strcmp (str, "..") == 0)
     str = NULL;
 
-  //Nothing has been trimmed. Set return values and exit the function.
+  // Nothing has been trimmed. Set return values and exit the function.
   if (str == NULL) {
     *reserve = 0;
     return NULL;
   }
   
-  //Set the amount to be trimmed.
+  // Set the amount to be trimmed.
   *reserve = strlen (*argpath) + 1;
 
   /* Collect the filename from the prefix path.
@@ -485,7 +485,7 @@ static int is_unique (const char *fullpath)
   struct stat st;
 
   if (stat (fullpath, &st) == -1) {
-    if (errno == ENOENT) { //Return true if the file does not exist.
+    if (errno == ENOENT) { // Return true if the file does not exist.
       return 0;
     } else {
       fprintf (stderr, "%s: stat: %s\n", __FUNCTION__, strerror (errno));

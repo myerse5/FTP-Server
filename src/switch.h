@@ -26,4 +26,4 @@
 void *command_switch (void *param);
 
 
-#endif //__SWITCH_H__
+#endif // __SWITCH_H__

@@ -10,7 +10,7 @@
 #define __DIRECTORY_H__
 
 
-#include "session.h" //Required for session_info_t in function prototype.
+#include "session.h" // Required for session_info_t in function prototype.
 
 
 /******************************************************************************
@@ -69,4 +69,4 @@ void cmd_cwd (session_info_t *si, char *arg);
 void cmd_pwd (session_info_t *si);
 
 
-#endif //__DIRECTORY_H__
+#endif // __DIRECTORY_H__

@@ -113,19 +113,19 @@ char *rootdir;
  *****************************************************************************/
 int main (int argc, char *argv[])
 {
-  int listenSfd;        // Listen for control connections on this sfd.
-  int *csfd;            // An accepted control socket file descriptor.
-  pthread_t thread;     // The handle for a new thread.
-  pthread_attr_t attr;  // pthread attribute, to set detached state on creation.
+  int listenSfd;        //  Listen for control connections on this sfd.
+  int *csfd;            //  An accepted control socket file descriptor.
+  pthread_t thread;     //  The handle for a new thread.
+  pthread_attr_t attr;  //  pthread attribute, set detached state on creation.
   
   char *rootTemp;
 
-  //Retrieve the name of the root directory from the config file.
+  // Retrieve the name of the root directory from the config file.
   if ((rootTemp = get_config_value ("ROOT_PATH_CONFIG", FTP_CONFIG_FILE)) == NULL)
     return -1;
 
-  /* Append the relative path from the server executable to the server root directory
-   * to the absolute path of the server executable. */
+  /* Append the relative path from the server executable to the server root
+   * directory to the absolute path of the server executable. */
   if ((rootdir = get_config_path (rootTemp)) == NULL) {
     free (rootTemp);
     return -1;
@@ -140,23 +140,23 @@ int main (int argc, char *argv[])
   }
   free (rootTemp);
 
-  //Initialize the pthread attributes.
+  // Initialize the pthread attributes.
   if (pthread_attr_init (&attr) != 0) {
     fprintf (stderr, "%s: pthread_attr_init: %s\n", __FUNCTION__, strerror (errno));
     return -1;
   }
 
-  //Set the detach state attribute.
+  // Set the detach state attribute.
   if (pthread_attr_setdetachstate (&attr, PTHREAD_CREATE_DETACHED) != 0) {
     fprintf (stderr, "%s: pthread_attr_init: %s\n", __FUNCTION__, strerror (errno));
     return -1;
   }
 
-  //Create a socket to listen for control connections.
+  // Create a socket to listen for control connections.
   if ((listenSfd = get_control_sock ()) == -1)
     return -1;
 
-  //Display usage instructions to the server operator, and connection information.
+  // Display usage instructions and connection information to the terminal.
   if (welcome_message() == -1) {
     return -1;
   }
@@ -178,11 +178,11 @@ int main (int argc, char *argv[])
       break;
     }
 
-    //Accept a connection from the client, or read a server command on stdin.
+    // Accept a connection from the client, or read a server command on stdin.
     if ((*csfd = accept_connection (listenSfd, ACCEPT_CONTROL, NULL)) == -1) {
       free (csfd);
       continue;
-    } else if (*csfd == STDIN_READY) {   //There is something to read on stdin.
+    } else if (*csfd == STDIN_READY) {   // There is something to read on stdin.
       if (read_server_cmd () == SHUTDOWN_SERVER) {
 	shutdownServer = true;
 	free (csfd);
@@ -193,14 +193,14 @@ int main (int argc, char *argv[])
       }
     }
 
-    //Create a new thread for this control connection.
+    // Create a new thread for this control connection.
     if (pthread_create (&thread, &attr, &control_thread, csfd) != 0) {
       fprintf (stderr, "%s: pthread_create: %s\n", __FUNCTION__, strerror (errno));
       free (csfd);
       continue;
     }
 
-    //Increment the control connection thread count.
+    // Increment the control connection thread count.
     if (modify_cthread_count (1) == -1)
       break;
   }
@@ -210,7 +210,7 @@ int main (int argc, char *argv[])
   if (activeControlThreads > 0)
     printf ("waiting on threads to resolve...\n");
 
-  //Wait for the control threads to shutdown.
+  // Wait for the control threads to shutdown.
   while (activeControlThreads > 0) {
     sleep (1);
   }

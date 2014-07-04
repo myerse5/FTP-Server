@@ -35,4 +35,4 @@ int welcome_message (void);
 int read_server_cmd (void);
 
 
-#endif //__SERVERCMD_H__
+#endif // __SERVERCMD_H__

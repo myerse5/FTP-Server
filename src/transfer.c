@@ -21,12 +21,12 @@
 #include "session.h"
 
 
-//Local function prototypes.
+// Local function prototypes.
 static int perm_neg_check (session_info_t *si, char *arg);
 static void store (session_info_t *si, char *cmd, char *purp);
 
 
-//TODO Consolidate and check this (arbitrary?) value.
+// TODO Consolidate and check this (arbitrary?) value.
 #define BUFFSIZE 1000
 
 
@@ -40,7 +40,7 @@ void cmd_stou (session_info_t *si, char *arg)
   char *fullpath;
   int csfd = si->csfd;
 
-  //The user must be logged in on, and must not be anonymous.
+  // The user must be logged in on, and must not be anonymous.
   if (si->loggedin == false || strcmp (si->user, "anonymous") == 0) {
     send_mesg_530 (csfd, REPLY_530_REQUEST);
     close (si->dsfd);
@@ -119,10 +119,10 @@ static void store (session_info_t *si, char *cmd, char *purp)
   FILE *storfile;
   int rv;
   char buffer[BUFFSIZE];
-  char *fullpath;   //Used to create the absolute path on the file system.
+  char *fullpath;   // Used to create the absolute path on the file system.
   int csfd = si->csfd;
   
-  //Send the positive preliminary response.
+  // Send the positive preliminary response.
   if (si->type == 'a') {
     send_mesg_150 (csfd, cmd, REPLY_150_ASCII);
   } else {
@@ -165,12 +165,12 @@ static void store (session_info_t *si, char *cmd, char *purp)
       cleanup_stor_recv (si, storfile, 451);
       return;
     }
-    //check for timeout.
+    // check for timeout.
     if (nfds == 0)
       continue;
     
-    //check if data port has rxed data
-    //TODO: Check for recv errno. Will need to add reply message.
+    // check if data port has rxed data
+    // TODO: Check for recv errno. Will need to add reply message.
     if (FD_ISSET (si->dsfd, &rfds)) {
       if ((rv = recv (si->dsfd, buffer, BUFFSIZE, 0)) > 0)
 	fwrite (buffer, sizeof(char), rv, storfile);
@@ -184,7 +184,7 @@ static void store (session_info_t *si, char *cmd, char *purp)
     send_mesg_226 (csfd, REPLY_226_SUCCESS);
   }
   
-  //Close the file and the data connection.
+  // Close the file and the data connection.
   cleanup_stor_recv (si, storfile, 0);
   return;
 }
@@ -215,7 +215,7 @@ void cmd_retr (session_info_t *si, char *path)
     return;
   }
 
-  //Send the positive preliminary response.
+  // Send the positive preliminary response.
   if (si->type == 'a') {
     send_mesg_150 (csfd, path, REPLY_150_ASCII);
   } else {
@@ -279,7 +279,7 @@ void cmd_retr (session_info_t *si, char *path)
 	}
       }
 
-      //Send the file over the data connection.
+      // Send the file over the data connection.
       if (send_all (si->dsfd, (uint8_t *)buffer, retVal) == -1) {
 	send_mesg_451 (csfd);
 	close (si->dsfd);
@@ -336,7 +336,7 @@ static int perm_neg_check (session_info_t *si, char *arg)
     return -1;
   }
   
-  //Determine if the pathname argument should be accepted.
+  // Determine if the pathname argument should be accepted.
   if ((pathCheck = check_future_file (si->cwd, arg, false)) == -1) {
     cleanup_stor_recv (si, NULL, 450);
     return -1;
@@ -367,11 +367,11 @@ void cleanup_stor_recv (session_info_t *si, FILE *fp,  int errcode)
     send_mesg_450 (si->csfd);
   }
   
-  //Close the filepointer if one is open.
+  // Close the filepointer if one is open.
   if (fp != NULL)
     fclose (fp);
 
-  //Reset the data connection socket.
+  // Reset the data connection socket.
   close (si->dsfd);
   si->dsfd = 0;
 }

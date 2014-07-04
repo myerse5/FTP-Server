@@ -15,13 +15,13 @@
 #include "config.h"
 
 
-//The maximum length of a line found in the config file.
+// The maximum length of a line found in the config file.
 #define MAX_CONFIG_LINE 80
-//This character begins a comment line in the configuration file.
+// This character begins a comment line in the configuration file.
 #define CONFIG_COMMENT '#'
 
 
-//Local function prototype.
+// Local function prototype.
 static char *search_config (const char *target, const char *pathname);
 
 
@@ -33,19 +33,19 @@ char *get_config_value (const char *configSetting, const char *filen)
   char *configPath = NULL;
   char *resultValue;
 
-  //Get the filename path to the configuration file.
+  // Get the filename path to the configuration file.
   if ((configPath = get_config_path (filen)) == NULL) {
     return NULL;
   }
 
-  //Retrieve the value of the setting from the configuration file.
+  // Retrieve the value of the setting from the configuration file.
   if ((resultValue = search_config ((const char *)configSetting,
 				    (const char *)configPath)) == NULL) {
     free (configPath);
     return NULL;
   }
 
-  //Free all memory no longer required, return the found value.
+  // Free all memory no longer required, return the found value.
   free (configPath);
   return resultValue;
 }
@@ -56,10 +56,10 @@ char *get_config_value (const char *configSetting, const char *filen)
  *****************************************************************************/
 char *get_config_path (const char *filename)
 {
-  int filenameSize, pathSize, absPathSize;    //The required string lengths.
+  int filenameSize, pathSize, absPathSize;    // The required string lengths.
   char *path;
 
-  //Get the pathname of the current working directory.
+  // Get the pathname of the current working directory.
   if ((path = getcwd (NULL, 0)) == NULL) {
     fprintf (stderr, "%s: getcwd: %s\n", __FUNCTION__, strerror (errno));
     return NULL;
@@ -76,7 +76,7 @@ char *get_config_path (const char *filename)
    * the null terminator. */
   absPathSize = (filenameSize + 1) + (pathSize + 1);
 
-  //Adjust the size of the pathname to include the filename being created.
+  // Adjust the size of the pathname to include the filename being created.
   if ((path = realloc (path, absPathSize)) == NULL) {
     fprintf (stderr, "%s: realloc: could not allocate required space\n",
 	     __FUNCTION__);
@@ -86,7 +86,7 @@ char *get_config_path (const char *filename)
   /* Replace the null character appearing after the path with a directory
    * separator '/'. Then append the filename. */
   path[pathSize] = '/';
-  //Append the filename to the current working directory path.
+  // Append the filename to the current working directory path.
   strncpy ((path + pathSize + 1), filename, (filenameSize + 1));
   
   return path;
@@ -113,30 +113,30 @@ char *get_config_path (const char *filename)
  *****************************************************************************/
 static char *search_config (const char *target, const char *pathname)
 {
-  FILE *fin;                      //Filepointer for the config file.
+  FILE *fin;                      // Filepointer for the config file.
  
-  char line[MAX_CONFIG_LINE + 1]; //Collect a line from the config file.
+  char line[MAX_CONFIG_LINE + 1]; // Collect a line from the config file.
   char *linePtr;
 
-  char *value;                    //The value of the target setting.
-  int valLength; //The length of the value string for the target setting.
+  char *value;                    // The value of the target setting.
+  int valLength; // The length of the value string for the target setting.
 
-  //Open the filestream.
+  // Open the filestream.
   if ((fin = fopen (pathname, "r")) == NULL) {
     fprintf (stderr, "%s: fopen: %s\n", __FUNCTION__, strerror (errno));
     return NULL;
   }
 
-  //Search each line for the target setting. 
+  // Search each line for the target setting. 
   while (fgets (line, MAX_CONFIG_LINE, fin) != NULL) {
     /* The configuration file allows comments. View the header comment of the
      * the configuration file for more details. Skip any comment lines. */
     if (line[0] == CONFIG_COMMENT)
       continue;
 
-    //Move to the next line if this line is not the setting.
+    // Move to the next line if this line is not the setting.
     if (strstr (line, target) == NULL)
-      continue;   //not present, search next line.
+      continue;   // not present, search next line.
     else
       break;
   }
@@ -147,7 +147,7 @@ static char *search_config (const char *target, const char *pathname)
     return NULL;
   }
 
-  //Determine if the target setting was found or the entire file was read.
+  // Determine if the target setting was found or the entire file was read.
   if (strstr (line, target) == NULL) {
     fprintf (stderr, "%s: '%s' setting was not found in file './%s'\n",
 	     __FUNCTION__, target, pathname);
@@ -162,9 +162,9 @@ static char *search_config (const char *target, const char *pathname)
     return NULL;
   }
 
-  //Do not include the space character separating the target setting and value.
+  // Do not include the space character separating the target setting and value.
   linePtr++;
-  //Find the length of the value for the target setting.
+  // Find the length of the value for the target setting.
   valLength = strlen (linePtr);
 
   /* Return error if the value contains no characters. This condition will be
@@ -177,7 +177,7 @@ static char *search_config (const char *target, const char *pathname)
     return NULL;
   } 
 
-  //Return error if the only character in the value is a newline character.
+  // Return error if the only character in the value is a newline character.
   if ((valLength == 1) && (linePtr[0] == '\n')) {
     fprintf (stderr, "%s: stchr: improper config file format\n", __FUNCTION__);
     return NULL;
@@ -191,13 +191,13 @@ static char *search_config (const char *target, const char *pathname)
     valLength--;
   }
 
-  //Allocate memory for the value string.
+  // Allocate memory for the value string.
   if ((value = malloc ((valLength + 1) * sizeof (*value))) == NULL) {
     fprintf (stderr, "%s: malloc: could not allocate the required space\n",
 	     __FUNCTION__);
     return NULL;
   }
-  //Copy the value from the target setting line to the target setting value str.
+  // Copy the value from the target setting line to the local value string.
   strncpy (value, linePtr, valLength + 1);
 
   return value;

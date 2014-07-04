@@ -10,7 +10,7 @@
 #define __HELP_H__
 
 
-#include "session.h" //Required for session_info_t in function prototype.
+#include "session.h" // Required for session_info_t in function prototype.
 
 
 /******************************************************************************
@@ -28,4 +28,4 @@
 void cmd_help (session_info_t *si, char *arg);
 
 
-#endif  //__HELP_H__
+#endif  // __HELP_H__

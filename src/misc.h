@@ -11,7 +11,7 @@
 #define __MISC_H__
 
 
-#include "session.h" //Required for session_info_t in function parameters.
+#include "session.h" // Required for session_info_t in function parameters.
 
 
 /******************************************************************************
@@ -62,4 +62,4 @@ void cmd_stru (session_info_t *si, char *arg, int numArgs);
 void cmd_quit (session_info_t *si);
 
 
-#endif //__MISC_H__
+#endif // __MISC_H__

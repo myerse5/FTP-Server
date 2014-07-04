@@ -24,19 +24,19 @@
 #include "session.h"
 
 
-#define MAX_FDATSZ 4096  //TODO integrate into standard buffer size with an
-                         //actual error check involved.
+#define MAX_FDATSZ 4096  // TODO integrate into standard buffer size with an
+                         // actual error check involved.
 
 
-//Local function prototypes.
+// Local function prototypes.
 static void list_directory (session_info_t *si, char * fullpath, bool detail);
 static int detail_list (struct dirent *dirInfo, char *fullpath, char **output);
 
 
-extern char *rootdir; //The root directory of the server, defined in 'main.c'.
+extern char *rootdir; // The root directory of the server, defined in 'main.c'.
 
 
-//TODO: integrate into standard buffer size with an actual error check involved.
+// TODO: integrate into standard buffer size with an actual error check involved.
 char fileBuff[MAX_FDATSZ];
 
 
@@ -54,7 +54,7 @@ void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
     return;
   }
   
-  //Determine if the file is a directory.
+  // Determine if the file is a directory.
   if (!check_dir_exist (si->cwd, arg)) {
     send_mesg_553 (csfd);
     return;
@@ -68,7 +68,7 @@ void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
     return;
   }
 
-  //Create a single pathname to the directory from the pathname fragments.
+  // Create a single pathname to the directory from the pathname fragments.
   if ((fullpath = merge_paths (si->cwd, arg, NULL)) == NULL) {
     send_mesg_451 (csfd);
     close (si->dsfd);
@@ -96,15 +96,15 @@ void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
  *****************************************************************************/
 static void list_directory (session_info_t *si, char * fullpath, bool detail)
 {
-  DIR *dp;                       //directory pointer
-  struct dirent *ep;             //entry pointer
-  char *output;                  //output buffer
+  DIR *dp;                       // directory pointer
+  struct dirent *ep;             // entry pointer
+  char *output;                  // output buffer
   int outSize = CMD_STRLEN;
-  int csfd;                      //Control socket file descriptor.
+  int csfd;                      // Control socket file descriptor.
 
   csfd = si->csfd;
 
-  //Open the directory to be listed.
+  // Open the directory to be listed.
   if ((dp = opendir (fullpath)) == NULL) {
     fprintf (stderr, "%s: opendir: %s\n", __FUNCTION__, strerror (errno));
     send_mesg_451 (csfd);
@@ -113,7 +113,7 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
     return;
   }
 
-  //Create an output buffer.
+  // Create an output buffer.
   output = calloc (outSize, sizeof(*output));
   if(output == NULL){
     fprintf (stderr, "%s: calloc of %d bytes failed\n", __FUNCTION__, outSize);
@@ -124,11 +124,11 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
   }
 
   errno = 0;
-  //Read all entries from the directory.
+  // Read all entries from the directory.
   while ((ep = readdir (dp)) != NULL && (si->cmdAbort == false)) {
-    //Do not list hidden files, current directory, or parent directory.
+    // Do not list hidden files, current directory, or parent directory.
     if (ep->d_name[0] != '.') {
-      //Create a detailed long listing, or a simple filename listing.
+      // Create a detailed long listing, or a simple filename listing.
       if (detail == true) {
 	detail_list (ep, fullpath, &output);
       } else {
@@ -136,7 +136,7 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
 	strcat (output, "\r\n");
       }
 
-      //Expand the buffer when appropriate.
+      // Expand the buffer when appropriate.
       if (strlen (output) >= (outSize-356)) {
       	outSize += CMD_STRLEN;
       	if ((output = realloc (output, outSize * sizeof(*output))) == NULL) {
@@ -164,11 +164,11 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
     }
   }
 
-  //Send the directory listing.
+  // Send the directory listing.
   send_all (si->dsfd, (uint8_t*)output, strlen (output));
   free (output);
 
-  //Send the appropriate message if the command was aborted.
+  // Send the appropriate message if the command was aborted.
   if (si->cmdAbort == true) {
     send_mesg_426 (csfd);
     si->cmdAbort = false;
@@ -176,7 +176,7 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
     send_mesg_226 (csfd, REPLY_226_SUCCESS);
   }
 
-  //Clean up before returning.
+  // Clean up before returning.
   if (closedir (dp) == -1)
     fprintf (stderr, "%s: closedir: %s\n", __FUNCTION__, strerror (errno));
 
@@ -202,8 +202,8 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
  *****************************************************************************/
 static int detail_list (struct dirent *dirInfo, char *fullpath, char **output)
 {
-  //cmtime() requires 26 characters. We will use less characters in our string.
-  char time[26];  //Change this to a constant TODO.
+  // cmtime() requires 26 characters. We will use less characters in our string.
+  char time[26];  // Change this to a constant TODO.
   struct stat fileStat;
   struct tm * timeinfo;
   errno = 0;
@@ -215,20 +215,20 @@ static int detail_list (struct dirent *dirInfo, char *fullpath, char **output)
   strcat (filename, fullpath);
   strcat (filename, dirInfo->d_name);
 
-  // Check to see if stat() encountered any error
+  //  Check to see if stat() encountered any error
   if (stat (filename, &fileStat) == -1) {
     fprintf (stderr, "%s: stat: %s\n", __FUNCTION__, strerror (errno));
     return -1;
   }
 
-  //Prepare the time returned from stat for a call to strftime().
+  // Prepare the time returned from stat for a call to strftime().
   if ((timeinfo = gmtime (&fileStat.st_mtime)) == NULL) {
     fprintf (stderr, "%s: gmtime: failed\n", __FUNCTION__);
     return -1;
   }
   strftime (time, 20, "%b %d %Y", timeinfo);
 
-  //Store the type of file to the output string.
+  // Store the type of file to the output string.
   if(dirInfo->d_type == DT_DIR){
     strcat(*output, "d");
   } else if (dirInfo->d_type == DT_LNK) {
@@ -237,7 +237,7 @@ static int detail_list (struct dirent *dirInfo, char *fullpath, char **output)
     strcat(*output, "-");
   }
 
-  //Store the permissions to the output string.
+  // Store the permissions to the output string.
   (fileStat.st_mode & S_IRUSR) ? strcat(*output,"r"):strcat(*output,"-");
   (fileStat.st_mode & S_IWUSR) ? strcat(*output,"w"):strcat(*output,"-");
   (fileStat.st_mode & S_IXUSR) ? strcat(*output,"x"):strcat(*output,"-");
@@ -248,7 +248,7 @@ static int detail_list (struct dirent *dirInfo, char *fullpath, char **output)
   (fileStat.st_mode & S_IWOTH) ? strcat(*output,"w"):strcat(*output,"-");
   (fileStat.st_mode & S_IXOTH) ? strcat(*output,"x"):strcat(*output,"-");
 
-  //Store the other listing requirements to the output string.
+  // Store the other listing requirements to the output string.
   sprintf ((*output) + strlen(*output), "%zu\t%d\t%d\t%lld\t%s\t%s\r\n",
 	   fileStat.st_nlink, fileStat.st_uid, fileStat.st_gid,
 	   (unsigned long long)fileStat.st_size, time, dirInfo->d_name);
@@ -264,16 +264,16 @@ void cmd_mkd (session_info_t *si, char * filepath)
 {
   mode_t permissions;
   char *outpath;
-  int csfd = si->csfd;       //Control socket file descriptor.
+  int csfd = si->csfd;       // Control socket file descriptor.
 
-  //Sets permission for the new folder being created.
+  // Sets permission for the new folder being created.
   permissions = 0;
   permissions = permissions | S_IRUSR;
   permissions = permissions | S_IWUSR;
   permissions = permissions | S_IXUSR;
 
-  // Checks to make sure that only a logged in user can make a
-  // new directory as well as the user is NOT anonymous.
+  //  Checks to make sure that only a logged in user can make a
+  //  new directory as well as the user is NOT anonymous.
   if (si->loggedin == false || strcmp (si->user, "anonymous") == 0) {
     send_mesg_530 (csfd, REPLY_530_REQUEST);
     close (si->dsfd);
@@ -338,7 +338,7 @@ void cmd_cdup (session_info_t *si, char *arg)
     return;
   }
 
-  //Call cmd_cwd() to change to the parent directory.
+  // Call cmd_cwd() to change to the parent directory.
   up[0] = '\0';
   strcpy (up, "..");
   cmd_cwd (si, up);
@@ -367,7 +367,7 @@ void cmd_cwd (session_info_t *si, char *arg)
     return;
   }
 
-  //Create a single pathname to the directory from the pathname fragments.
+  // Create a single pathname to the directory from the pathname fragments.
   if ((fullpath = merge_paths (si->cwd, arg, NULL)) == NULL) {
     send_mesg_550_process_error (csfd);
     return;

@@ -40,4 +40,4 @@ int get_arg_count (const char *cmdString);
  *****************************************************************************/
 void convert_to_upper (char *string);
 
-#endif //__PARSER_H__
+#endif // __PARSER_H__

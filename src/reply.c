@@ -19,7 +19,7 @@
 
 /* A response message sent over the control connection should fit on a
  * standard, default terminal line. */
-#define STD_TERM_SZ 80  //Use for one line replies where length is not known.
+#define STD_TERM_SZ 80  // Use for one line replies where length is not known.
 
 
 /******************************************************************************
@@ -210,21 +210,21 @@ int send_mesg_227 (int csfd, int dsfd)
 
   /* Used to collect the the decimal value of each byte, which will be sent to
    * the client as specified RFC 959. */
-  int h1, h2, h3, h4;         //The bytes of the IPv4 address
-  int p1, p2;                 //The bytes of the port
+  int h1, h2, h3, h4;         // The bytes of the IPv4 address
+  int p1, p2;                 // The bytes of the port
 
   /* Initialize addr_len to the size of an IPv4 address. If getsockname()
    * modifies this value, an IPv4 address was not used to create the PASV
    * socket. */
   addrLen = sizeof(sa);
 
-  //Collect the address info
+  // Collect the address info
   if (getsockname (dsfd, (struct sockaddr *)&sa, &addrLen) == -1)
     return -1;
 
-  //Ensure the passive socket has a 4-byte address.
+  // Ensure the passive socket has a 4-byte address.
   if (addrLen > sizeof(sa)) {
-    //The socket is not IPv4, the socket is invalid for the command PASV.
+    // The socket is not IPv4, the socket is invalid for the command PASV.
     return -1;
   }
 
@@ -248,12 +248,12 @@ int send_mesg_227 (int csfd, int dsfd)
   p1 = (sa.sin_port & 0xFF00) >> BITS_IN_BYTE;
   p2 = (sa.sin_port & 0x00FF);
 
-  //Create the feedback message, code 227.
+  // Create the feedback message, code 227.
   sprintf ((char*)mesg, "227 Entering passive mode (%d,%d,%d,%d,%d,%d).\n", 
 	   h1, h2, h3, h4, p1, p2);
 
   mesgLen = strlen ((char*)mesg);
-  //Send the feedback message to the control socket.
+  // Send the feedback message to the control socket.
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }

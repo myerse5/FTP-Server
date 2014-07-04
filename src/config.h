@@ -11,9 +11,9 @@
 #define __CONFIG_H__
 
 
-//The name of the server configuration file.
+// The name of the server configuration file.
 #define FTP_CONFIG_FILE "../conf/ftp.conf"
-//The name of the user configuration file.
+// The name of the user configuration file.
 #define USER_CONFIG_FILE "../conf/user.conf"
 
 
@@ -62,4 +62,4 @@ char *get_config_value (const char *configSetting, const char *filename);
 char *get_config_path (const char *filename);
 
 
-#endif //__CONFIG_H__
+#endif // __CONFIG_H__

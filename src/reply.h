@@ -264,4 +264,4 @@ int send_mesg_550_unavailable (int csfd);
 int send_mesg_553 (int csfd);
 
 
-#endif //__REPLY_H__
+#endif // __REPLY_H__

@@ -24,7 +24,7 @@
 #include "queue.h"
 
 
-extern int shutdownServer; //Defined in the file "main.c"
+extern int shutdownServer; // Defined in the file "main.c"
 
 
 /******************************************************************************
@@ -42,7 +42,7 @@ int session (int csfd)
   
   pthread_attr_init (&attr);
 
-  //init sessioninfo
+  // init sessioninfo
   sessioninfo.csfd = csfd;
   sessioninfo.dsfd = 0;
   sessioninfo.cmdAbort = false;
@@ -57,15 +57,15 @@ int session (int csfd)
   commandstr[0] = '\0';
   
 
-  //Check if the server is shutting down or if the quit cmd was received from
-  //the client.
+  // Check if the server is shutting down or if the quit cmd was received from
+  // the client.
   while (!shutdownServer && !sessioninfo.cmdQuit) {
     FD_ZERO (&rfds);
     FD_SET (csfd, &rfds);
     timeout.tv_sec = SERVER_SHUTDOWN_TIMEOUT_SEC;
     timeout.tv_usec = SERVER_SHUTDOWN_TIMEOUT_USEC;
     
-    //read from socket with timeout
+    // read from socket with timeout
     if (select (csfd+1, &rfds, NULL, NULL, &timeout) == -1) {
       if (errno == EINTR)
 	continue;
@@ -74,7 +74,7 @@ int session (int csfd)
       return -1;
     }
     
-    //if there's anything to read on the control socket, do so.
+    // if there's anything to read on the control socket, do so.
     if (FD_ISSET (csfd, &rfds)) {
       if (read_cmd (commandstr, csfd, &sessioninfo) == -1) {
 	free_queue (cmdQueuePtr);
@@ -84,7 +84,7 @@ int session (int csfd)
       cmdQueuePtr = add_to_queue (commandstr, cmdQueuePtr);
     }
     
-    //if command is abort (ABOR) let the current thread know
+    // if command is abort (ABOR) let the current thread know
     if (strncasecmp (commandstr, "ABOR", 4) == 0) {
       sessioninfo.cmdAbort = true;
       commandstr[0] = '\0';
@@ -92,8 +92,8 @@ int session (int csfd)
     }
     
     
-    //if there isn't a command_thread already, create one to either handle a
-    //command on the command_queue or the current command
+    // if there isn't a command_thread already, create one to either handle a
+    // command on the command_queue or the current command
     else if (commandThread == 0 && cmdQueuePtr) {
       if (cmdQueuePtr) {
 	cmdQueuePtr = pull_from_queue (commandstr, cmdQueuePtr);
@@ -107,7 +107,7 @@ int session (int csfd)
 	return -1;
       }
 
-      //check if the command thread is done, if so, join
+      // check if the command thread is done, if so, join
     } else if (sessioninfo.cmdComplete) {
       if (pthread_join (commandThread, NULL) == -1) {
 	fprintf (stderr, "%s: pthread_join: %s\n", __FUNCTION__, strerror (errno));
@@ -118,11 +118,11 @@ int session (int csfd)
       sessioninfo.cmdString[0] = '\0';
       sessioninfo.cmdComplete = false;
     }
-    //add the command to the command queue
-    //else
-    //cmd_queue_ptr = addToQueue(commandstr, cmd_queue_ptr);
+    // add the command to the command queue
+    // else
+    // cmd_queue_ptr = addToQueue(commandstr, cmd_queue_ptr);
   }
-  //if shutdown or quit was given, abort the current thread if running
+  // if shutdown or quit was given, abort the current thread if running
   sessioninfo.cmdAbort = true;
   if (commandThread) {
     if (pthread_join (commandThread, NULL) == -1) {
@@ -132,7 +132,7 @@ int session (int csfd)
     }
   }
   
-  //Close the data connection socket.
+  // Close the data connection socket.
   if (sessioninfo.dsfd > 0) {
     if (close (sessioninfo.dsfd) == -1)
       fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
@@ -152,7 +152,7 @@ int read_cmd (char *str, int sock, session_info_t *si)
   int rt = 0;
   int len = 0;
   
-  //keep adding rxed chars to str until \n rxed
+  // keep adding rxed chars to str until \n rxed
   while (1) {
     if ((rt = recv (sock, str+len, 1, 0)) == -1) {
       if (errno == EINTR)
@@ -164,7 +164,7 @@ int read_cmd (char *str, int sock, session_info_t *si)
     if (rt > 0) {      
       len += rt;
       if (str[len-1] == '\n') {
-	str[len-1] = '\0'; //null terminate string
+	str[len-1] = '\0'; // null terminate string
 	break;
       }
     } else if (rt == 0) {

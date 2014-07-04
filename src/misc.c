@@ -26,7 +26,7 @@ void cmd_type (session_info_t *si, char *arg)
 {
   int csfd = si->csfd;
 
-  //The user must be logged in to change the type.
+  // The user must be logged in to change the type.
   if (!si->loggedin) {
     send_mesg_530 (csfd, REPLY_530_REQUEST);
     return;
@@ -37,9 +37,9 @@ void cmd_type (session_info_t *si, char *arg)
     return;
   }
 
-  //If the arg is 1 char it must be an 'a' or 'i', case insensitive.
+  // If the arg is 1 char it must be an 'a' or 'i', case insensitive.
   if (strlen (arg) == 1) {
-    arg[0] = tolower (arg[0]); //change arg to lowercase
+    arg[0] = tolower (arg[0]); // change arg to lowercase
     if (arg[0] == 'a') {
       send_mesg_200 (csfd, REPLY_200_ASCII);
       si->type = 'a';
@@ -53,7 +53,7 @@ void cmd_type (session_info_t *si, char *arg)
   }
 
   if (strlen (arg) == 3) {
-    //set interesting chars to lowercase
+    // set interesting chars to lowercase
     if (strcasecmp (arg, "a n") == 0) {
       send_mesg_200 (csfd, REPLY_200_ASCII);
       si->type ='a';
@@ -75,7 +75,7 @@ void cmd_mode (session_info_t *si, char *arg)
 
   if (arg) {
     if (strlen (arg) == 1) {
-      arg[0] = tolower (arg[0]); //change arg to lowercase
+      arg[0] = tolower (arg[0]); // change arg to lowercase
       if (arg[0] == 's') {
 	send_mesg_200 (csfd, REPLY_200_STREAM);
 	return;	

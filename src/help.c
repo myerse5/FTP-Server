@@ -15,7 +15,7 @@
 #include "session.h"
 
 
-//Limit values for a legal command.
+// Limit values for a legal command.
 #define MAX_CMD_SIZE 4
 #define MAX_NUM_ARGS 1
 #define MIN_CMD_SIZE 3
@@ -28,7 +28,7 @@ void cmd_help (session_info_t *si, char *arg)
 {
   int csfd = si->csfd;
 
-  //Determine if the client wants a list of commands or usage instructions.
+  // Determine if the client wants a list of commands or usage instructions.
   if (arg == NULL) {
     send_mesg_214_general (csfd);
     return;

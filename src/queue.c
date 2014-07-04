@@ -30,13 +30,13 @@ queue* add_to_queue (char *commandstr, queue *cmdQueuePtr)
   
   if (cmdQueuePtr) {
     temp = cmdQueuePtr;
-    //Iterate to the end of the queue.
+    // Iterate to the end of the queue.
     while(temp->next)
       temp = temp->next;
-    //Add node to the end of the queue.
+    // Add node to the end of the queue.
     temp->next = newptr;
   } else {
-    //Otherwise node is the head of the queue.
+    // Otherwise node is the head of the queue.
     cmdQueuePtr = newptr; 
   }
   

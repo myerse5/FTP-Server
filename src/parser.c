@@ -19,7 +19,7 @@
 #define MIN_NUM_ARGS 2 
 
 
-//Local function prototypes.
+// Local function prototypes.
 static void trim_whitespace (char *string);
 
 
@@ -38,7 +38,7 @@ char *separate_cmd_from_args (char **cmdLineStr, int numArgs)
   }
   args = *cmdLineStr;
 
-  //Find the next whitespace character.
+  // Find the next whitespace character.
   while (!isspace (*(args++)));
 
   /* Replace the whitespace character with a NULL terminator to separate the
@@ -95,12 +95,12 @@ static void trim_whitespace (char *string)
   head = string - 1;
   tail = string + length;
 
-  //Point the head pointer to the first non-whitespace character.
+  // Point the head pointer to the first non-whitespace character.
   while (isspace (*(++head)));
-  //Point the tail pointer to the last non-whitespace character.
+  // Point the tail pointer to the last non-whitespace character.
   while (isspace (*(--tail)) && (tail != head));
 
-  //Trim trailing whitespace.
+  // Trim trailing whitespace.
   if ((string + length - 1) != tail) {
     *(tail + 1) = '\0';
   } else if ((head != string) && (tail == head)) {
@@ -109,7 +109,7 @@ static void trim_whitespace (char *string)
 
   tail = string;
 
-  //Trim leading whitespace.
+  // Trim leading whitespace.
   if (head != string) {
     while (*head) *tail++ = *head++;
     *tail = '\0';

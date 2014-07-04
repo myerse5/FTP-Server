@@ -11,7 +11,7 @@
 #define __PATH_H__
 
 
-#include <stdbool.h> //Required for boolean return type in function prototype.
+#include <stdbool.h> // Required for boolean return type in function prototype.
 
 
 /******************************************************************************
@@ -132,4 +132,4 @@ int check_future_file (const char *cwd, char *argpath, bool unique);
 char *merge_paths (const char *cwd, char *argpath, const int *reserve);
 
 
-#endif //__PATH_H__
+#endif // __PATH_H__

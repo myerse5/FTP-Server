@@ -12,10 +12,10 @@
 #define __SESSION_H__
 
 
-#include <stdbool.h>  //Required for 'bool' in structure.
+#include <stdbool.h>  // Required for 'bool' in structure.
 
 
-//TODO update these random, arbitrary values.
+// TODO update these random, arbitrary values.
 #define CMD_STRLEN 4096
 #define USER_STRLEN 64
 #define ABORT_STRLEN 5
@@ -46,15 +46,15 @@
  * the command thread notices this change and terminates).
  *****************************************************************************/
 typedef struct {
-  int csfd;	        	//control socket, rx from main
-  int dsfd;		      	//data socket, created from command thread
-  char cwd[CMD_STRLEN];		//current working directory
-  char user[USER_STRLEN];	//username
-  bool loggedin;		//whether user is logged in
-  bool cmdComplete;		//command thread is complete
-  bool cmdAbort;		//command to abort
-  bool cmdQuit;	         	//command to quit has been given
-  char cmdString[CMD_STRLEN];	//command string for current command
+  int csfd;	        	// control socket, rx from main
+  int dsfd;		      	// data socket, created from command thread
+  char cwd[CMD_STRLEN];		// current working directory
+  char user[USER_STRLEN];	// username
+  bool loggedin;		// whether user is logged in
+  bool cmdComplete;		// command thread is complete
+  bool cmdAbort;		// command to abort
+  bool cmdQuit;	         	// command to quit has been given
+  char cmdString[CMD_STRLEN];	// command string for current command
   char type;
 } session_info_t;
 
@@ -107,4 +107,4 @@ int session (int csfd);
 int read_cmd (char *str, int sock, session_info_t *si);
 
 
-#endif //__SESSION_H__
+#endif // __SESSION_H__

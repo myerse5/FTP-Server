@@ -13,15 +13,15 @@
 #define __NET_H__
 
 
-#include <arpa/inet.h> //required for the INETADDR_STRLEN in function prototype
-#include <stdbool.h>   //required for 'bool' in function prototype
-#include <stdint.h>    //required for 'uint8_t' in function prototype
-#include "session.h"   //required for 'session_info_t' in function prototype
+#include <arpa/inet.h> // required for the INETADDR_STRLEN in function prototype
+#include <stdbool.h>   // required for 'bool' in function prototype
+#include <stdint.h>    // required for 'uint8_t' in function prototype
+#include "session.h"   // required for 'session_info_t' in function prototype
 
 
-//The maximum number of characters a 16-bit integer can be converted to.
+// The maximum number of characters a 16-bit integer can be converted to.
 #define MAX_PORT_STR 6
-#define BITS_IN_BYTE 8  //The number of bits in a byte.
+#define BITS_IN_BYTE 8  // The number of bits in a byte.
 
 
 /******************************************************************************
@@ -32,10 +32,10 @@
  * if standard input should be included in the select() read set, and if the
  * socket that was passed to accept() may be closed if accept() was successful. 
  *****************************************************************************/
-#define ACCEPT_CONTROL 1    //Accept a control connection.
-#define ACCEPT_PASV    2    //Accept a connection on a PASV socket.
+#define ACCEPT_CONTROL 1    // Accept a control connection.
+#define ACCEPT_PASV    2    // Accept a connection on a PASV socket.
 
-//See "Other return values" in the accept_connection() function header.
+// See "Other return values" in the accept_connection() function header.
 #define STDIN_READY -999
 
 
@@ -183,4 +183,4 @@ int cmd_port (session_info_t *session, char *cmdStr);
 int send_all (int sfd, uint8_t *mesg, int toSend);
 
 
-#endif //__NET_H__
+#endif // __NET_H__

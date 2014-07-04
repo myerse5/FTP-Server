@@ -16,7 +16,7 @@
 #include "servercmd.h"
 
 
-#define MAX_SERVER_CMD_SZ 80 //Standard terminal window size.
+#define MAX_SERVER_CMD_SZ 80 // Standard terminal window size.
 
 
 /******************************************************************************
@@ -33,7 +33,7 @@ int welcome_message (void)
 {
   printf ("The server is now ready to accept client connections.\n\n");
 
-  //Display the connection information.
+  // Display the connection information.
   if (server_info () == -1)
     return -1;
 
@@ -57,24 +57,24 @@ static int server_info (void)
   char address[INET_ADDRSTRLEN];
   char *port;
 
-  //Get the chosen interface from the server configuration file.
+  // Get the chosen interface from the server configuration file.
   if ((interface = get_config_value ("INTERFACE_CONFIG",
 				     FTP_CONFIG_FILE)) == NULL)
     return -1;
 
-  //Get the IPv4 address for the interface.
+  // Get the IPv4 address for the interface.
   if (get_interface_address (interface, &address) == -1) {
     free (interface);
     return -1;
   }
   free (interface);
 
-  //Get the chosen port from the server configuration file.
+  // Get the chosen port from the server configuration file.
   if ((port = get_config_value ("DEFAULT_PORT_CONFIG",
 				FTP_CONFIG_FILE)) == NULL)
     return -1;
 
-  //Print the results to the console.
+  // Print the results to the console.
   printf ("The server can be reached at:\n");
   printf ("\tIP address: %s\n", address);
   printf ("\ton port   : %s\n", port);
@@ -91,7 +91,7 @@ int read_server_cmd (void)
 {
   char cmd[MAX_SERVER_CMD_SZ];
 
-  //Read a command from standard input.
+  // Read a command from standard input.
   if (fgets (cmd, MAX_SERVER_CMD_SZ - 1, stdin) == NULL)
     return -1;
 

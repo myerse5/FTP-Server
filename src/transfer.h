@@ -11,7 +11,7 @@
 #define __TRANSFER_H__
 
 
-#include "session.h" //Required for session_info_t in function prototype.
+#include "session.h" // Required for session_info_t in function prototype.
 
 
 /******************************************************************************
@@ -71,4 +71,4 @@ void cmd_retr (session_info_t *si, char *path);
 void cleanup_stor_recv (session_info_t *si, FILE *fp, int errcode);
 
 
-#endif //__TRANSFER_H__
+#endif // __TRANSFER_H__
