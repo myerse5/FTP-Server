@@ -29,15 +29,16 @@ void cmd_user (session_info_t *si, char *arg)
 {
   int csfd = si->csfd;
 
-  //if user command is given, log current user out
   if (arg == NULL) {
     send_mesg_501 (csfd);
     return;
   }
+
+  // If the USER command is given, log the current user out.
   si->loggedin = false;
   si->user[0] = '\0';
   
-  //Check if user is anonymous. Anonymous user requires no password.
+  // Check if user is anonymous. Anonymous user requires no password.
   if (strcasecmp (arg, "anonymous") == 0) {
     si->loggedin = true;
     send_mesg_230 (csfd, REPLY_230_SUCCESS);    
@@ -48,7 +49,7 @@ void cmd_user (session_info_t *si, char *arg)
     send_mesg_331 (csfd);
   }
 
-  //As long as the argument isn't null, copy the string over.
+  // Copy the user into the session info.
   strcpy (si->user, arg);
   return;
 }
@@ -63,40 +64,42 @@ void cmd_pass (session_info_t *si, char *arg)
   char md5string[33];
   int csfd = si->csfd;
  
-  //if user is logged in, no pass require
+  // If the client is logged in, no password is required.
   if (si->loggedin) {
     send_mesg_230 (csfd, REPLY_230_NONEED);
     return;
   }
-  
-  //Check if a username has been given.
-  if (strlen (si->user) > 0) {
-    if (arg) {
-      if ((pass = get_config_value (si->user, USER_CONFIG_FILE)) == NULL) {
-	send_mesg_530 (csfd, REPLY_530_FAIL);
-      } else {
-	//Get the MD5 of the password + username.
-	get_md5 (si->user, arg, md5string);
-	if (strcmp (md5string, pass) == 0) {
-	  send_mesg_230 (csfd, REPLY_230_SUCCESS);
-	  si->loggedin = true;
-	} else {
-	  //The name was found but the password did not match.
-	  send_mesg_530 (csfd, REPLY_530_FAIL);
-	}
-      }
-    } else {
-      //No argument was given, the USER command fails.
-      send_mesg_501 (csfd);
-      return;
-    }
-  } else {
+
+  // Do not login if the client has not yet supplied a username.
+  if (strlen (si->user) == 0) {
     send_mesg_503 (csfd);
+    return;
+  }
+
+  // No argument was given, the PASS command fails.
+  if (strlen (arg) == 0) {
+    send_mesg_501 (csfd);
+    return;
+  }
+
+  /* If no password has been set for the username entered by the client in the
+   * previous USER command, abort the login. */
+  if ((pass = get_config_value (si->user, USER_CONFIG_FILE)) == NULL) {
+    send_mesg_530 (csfd, REPLY_530_FAIL);
+    return;
+  }
+
+  // Get the MD5 of the password + username.
+  get_md5 (si->user, arg, md5string);
+  if (strcmp (md5string, pass) == 0) {
+    send_mesg_230 (csfd, REPLY_230_SUCCESS);
+    si->loggedin = true;
+  } else {
+    // The password did not match the password found in the user.conf file.
+    send_mesg_530 (csfd, REPLY_530_FAIL);
   }
   
-  if (pass)
-    free (pass);
-  
+  free (pass);
   return;
 }
 

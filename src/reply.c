@@ -70,7 +70,7 @@ int send_mesg_200 (int csfd, char option)
   } else if (option == REPLY_200_STREAM) {
     reply = "200 Switching to stream mode.\n";
   } else if (option == REPLY_200_FSTRU) {
-    reply = "200 - Switching to File Structure.\n";
+    reply = "200 Switching to File Structure.\n";
   }
 
   mesgLen = strlen (reply);
@@ -140,7 +140,7 @@ int send_mesg_214_specific (int csfd, char *syntax, char *info)
   char *reply;
   int mesgLen;
 
-  reply = "214 - Help is OK.\n\n";
+  reply = "214-Help message.\n";
   mesgLen = strlen (reply);
   if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1)
     return -1;
@@ -151,7 +151,7 @@ int send_mesg_214_specific (int csfd, char *syntax, char *info)
   if (send_all (csfd, (uint8_t*)info, strlen (info)) == -1)
     return -1;
 
-  reply = "\n214 - Help message.\n";
+  reply = "214 Help is OK.\n";
   mesgLen = strlen (reply);
   if (send_all (csfd, (uint8_t*)reply, strlen (reply)) == -1) {
     return -1;
@@ -165,7 +165,7 @@ int send_mesg_214_specific (int csfd, char *syntax, char *info)
  *****************************************************************************/
 int send_mesg_221 (int csfd)
 {
-  uint8_t mesg[] = "221 - Quitting system; goodbye.\n";
+  uint8_t mesg[] = "221 Quitting system; goodbye.\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesg);
@@ -249,7 +249,7 @@ int send_mesg_227 (int csfd, int dsfd)
   p2 = (sa.sin_port & 0x00FF);
 
   //Create the feedback message, code 227.
-  sprintf ((char*)mesg, "227 %d,%d,%d,%d,%d,%d\n", 
+  sprintf ((char*)mesg, "227 Entering passive mode (%d,%d,%d,%d,%d,%d).\n", 
 	   h1, h2, h3, h4, p1, p2);
 
   mesgLen = strlen ((char*)mesg);
@@ -304,8 +304,8 @@ int send_mesg_250 (int csfd)
  *****************************************************************************/
 int send_mesg_257 (int csfd, const char *directory)
 {
-  uint8_t mesgStart[] = "257 ";
-  uint8_t mesgEnd[] = "\n";
+  uint8_t mesgStart[] = "257 \"";
+  uint8_t mesgEnd[] = "\"\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesgStart);  
@@ -347,7 +347,7 @@ int send_mesg_331 (int csfd)
  *****************************************************************************/
 int send_mesg_425 (int csfd)
 {
-  uint8_t mesg[] = "425 - Cannot open data connection; please use the PORT or "
+  uint8_t mesg[] = "425 Cannot open data connection; please use the PORT or "
                    "PASV command first.\n";
   int mesgLen;
 
@@ -364,7 +364,7 @@ int send_mesg_425 (int csfd)
  *****************************************************************************/
 int send_mesg_426 (int csfd)
 {
-  uint8_t mesg[] = "426 - Connection close; transfer aborted.\n";
+  uint8_t mesg[] = "426 Connection close; transfer aborted.\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesg);  
@@ -395,7 +395,7 @@ int send_mesg_450 (int csfd)
  *****************************************************************************/
 int send_mesg_451 (int csfd)
 {
-  uint8_t mesg[] = "451 Requested action aborted. Local error in processing.\n";
+  uint8_t mesg[] = "451 Requested action aborted; local error in processing.\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesg);  
@@ -411,7 +411,7 @@ int send_mesg_451 (int csfd)
  *****************************************************************************/
 int send_mesg_500 (int csfd)
 {
-  uint8_t mesg[] = "500 Syntax error, command unrecognized.\n";
+  uint8_t mesg[] = "500 Syntax error; command unrecognized.\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesg);  
@@ -459,7 +459,7 @@ int send_mesg_503 (int csfd)
  *****************************************************************************/
 int send_mesg_504 (int csfd)
 {
-  uint8_t mesg[] = "504 - Command is not currently implemented.\n";
+  uint8_t mesg[] = "504 Command is not currently implemented.\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesg);
@@ -498,7 +498,7 @@ int send_mesg_530 (int csfd, char option)
  *****************************************************************************/
 int send_mesg_550_no_argument (int csfd)
 {
-  uint8_t mesg[] = "550 - No argument allowed.\n";
+  uint8_t mesg[] = "550 No argument allowed.\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesg);
@@ -546,7 +546,7 @@ int send_mesg_550_process_error (int csfd)
  *****************************************************************************/
 int send_mesg_550_unavailable (int csfd)
 {
-  uint8_t mesg[] = "550 Requested action not taken. File unavailable.\n";
+  uint8_t mesg[] = "550 Requested action not taken; file unavailable.\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesg);
@@ -562,7 +562,7 @@ int send_mesg_550_unavailable (int csfd)
  *****************************************************************************/
 int send_mesg_553 (int csfd)
 {
-  uint8_t mesg[] = "553 Requested action not taken. File name not allowed.\n";
+  uint8_t mesg[] = "553 Requested action not taken; file name not allowed.\n";
   int mesgLen;
 
   mesgLen = strlen ((char*)mesg);
