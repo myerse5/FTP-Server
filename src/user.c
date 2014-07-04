@@ -13,6 +13,7 @@
 #include "config.h"
 #include "md5.h"
 #include "net.h"
+#include "reply.h"
 #include "session.h"
 #include "user.h"
 
@@ -26,11 +27,11 @@ static void get_md5 (char *user, char *password, char *md5str);
  *****************************************************************************/
 void cmd_user (session_info_t *si, char *arg)
 {
-  char *reply;
+  int csfd = si->csfd;
+
   //if user command is given, log current user out
   if (arg == NULL) {
-    reply = "501 Syntax error in parameters or arguments.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+    send_mesg_501 (csfd);
     return;
   }
   si->loggedin = false;
@@ -39,17 +40,14 @@ void cmd_user (session_info_t *si, char *arg)
   //Check if user is anonymous. Anonymous user requires no password.
   if (strcasecmp (arg, "anonymous") == 0) {
     si->loggedin = true;
-    
-    reply = "230 Login successful.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
-    
+    send_mesg_230 (csfd, REPLY_230_SUCCESS);    
   } else if (arg != NULL) {
     /* Command will take any argument as a valid username in order
      * to prevent a malicious client from collecting usernames
      * from server. */
-    reply = "331 User name okay, need password.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+    send_mesg_331 (csfd);
   }
+
   //As long as the argument isn't null, copy the string over.
   strcpy (si->user, arg);
   return;
@@ -63,12 +61,11 @@ void cmd_pass (session_info_t *si, char *arg)
 {  
   char *pass = NULL;
   char md5string[33];
-  char *reply;
+  int csfd = si->csfd;
  
   //if user is logged in, no pass require
   if (si->loggedin) {
-    reply = "230 Already logged in.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+    send_mesg_230 (csfd, REPLY_230_NONEED);
     return;
   }
   
@@ -76,30 +73,25 @@ void cmd_pass (session_info_t *si, char *arg)
   if (strlen (si->user) > 0) {
     if (arg) {
       if ((pass = get_config_value (si->user, USER_CONFIG_FILE)) == NULL) {
-	reply = "530 Not logged in.\n";
-	send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+	send_mesg_530 (csfd, REPLY_530_FAIL);
       } else {
 	//Get the MD5 of the password + username.
 	get_md5 (si->user, arg, md5string);
 	if (strcmp (md5string, pass) == 0) {
-	  reply = "230 Login successful.\n";
+	  send_mesg_230 (csfd, REPLY_230_SUCCESS);
 	  si->loggedin = true;
-	  send_all (si->csfd, (uint8_t*)reply, strlen (reply));
 	} else {
 	  //The name was found but the password did not match.
-	  reply = "530 Not logged in.\n";
-	  send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+	  send_mesg_530 (csfd, REPLY_530_FAIL);
 	}
       }
     } else {
       //No argument was given, the USER command fails.
-      reply = "501 Syntax error in arguments.\n";
-      send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+      send_mesg_501 (csfd);
       return;
     }
   } else {
-    reply = "503 Login with USER first.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+    send_mesg_503 (csfd);
   }
   
   if (pass)

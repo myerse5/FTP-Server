@@ -141,55 +141,55 @@ void *command_switch (void *param) {
 
     //ABOR <CRLF>
   } else if (strcmp (cmd, "ABOR") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //ACCT <SP> <account-information> <CRLF>
   } else if (strcmp (cmd, "ACCT") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //ALLO <SP> <decimal-integer> [<SP> R <SP> <decimal-integer>] <CRLF>
   } else if (strcmp (cmd, "ALLO") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //DELE <SP> <pathname> <CRLF>
   } else if (strcmp (cmd, "DELE") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //NOOP <CRLF>
   } else if (strcmp (cmd, "NOOP") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //REIN <CRLF>
   } else if (strcmp (cmd, "REIN") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //REST <SP> <marker> <CRLF>
   } else if (strcmp (cmd, "REST") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //RMD <SP> <pathname> <CRLF>
   } else if (strcmp (cmd, "RMD") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //RNFR <SP> <pathname> <CRLF>
   } else if (strcmp (cmd, "RNFR") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //RNTO <SP> <pathname> <CRLF>
   } else if (strcmp (cmd, "RNTO") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //SITE <SP> <string> <CRLF>
   } else if (strcmp (cmd, "SITE") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //SMNT <SP> <pathname> <CRLF>
   } else if (strcmp (cmd, "SMNT") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
     //STAT [<SP> <pathname>] <CRLF>
   } else if (strcmp (cmd, "STAT") == 0) {
-    send_mesg_502 (csfd);
+    send_mesg_504 (csfd);
 
   } else {
     send_mesg_500 (csfd);

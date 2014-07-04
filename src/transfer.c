@@ -36,14 +36,13 @@ static void store (session_info_t *si, char *cmd, char *purp);
 void cmd_stou (session_info_t *si, char *arg)
 {
   int rt;
-  char *reply;
   char tempname[256];
   char *fullpath;
+  int csfd = si->csfd;
 
   //The user must be logged in on, and must not be anonymous.
-  if (si->loggedin == false || strcmp (si->user,"anonymous") == 0) {
-    reply = "550 Permission denied.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+  if (si->loggedin == false || strcmp (si->user, "anonymous") == 0) {
+    send_mesg_530 (csfd, REPLY_530_REQUEST);
     close (si->dsfd);
     si->dsfd = 0;
     return;
@@ -94,7 +93,7 @@ void cmd_appe (session_info_t *si, char *cmd)
   if (perm_neg_check (si, cmd) == -1)
     return;
   
-  store(si, cmd, "a");
+  store (si, cmd, "a");
   return;
 }
 
@@ -117,42 +116,24 @@ static void store (session_info_t *si, char *cmd, char *purp)
   struct timeval timeout;
   fd_set rfds;
   int nfds;
-
   FILE *storfile;
   int rv;
   char buffer[BUFFSIZE];
-
-  //Strings used to send reply messages.
-  char *reply;
-  char *type;
-
-  //Used to create the absolute path on the file system.
-  char *fullpath;
+  char *fullpath;   //Used to create the absolute path on the file system.
+  int csfd = si->csfd;
   
-  //send positive preliminary reply
-  reply = "150 Opening ";
-  send_all (si->csfd, (uint8_t*)reply, strlen (reply));
- 
-  if (si->type == 'a')
-    type = "ASCII";
-  else
-    type = "BINARY";
-  send_all(si->csfd,(uint8_t*)type, strlen(type));
-
-  reply = " mode data connection for ";
-  send_all (si->csfd, (uint8_t*)reply, strlen (reply));
-
-  send_all (si->csfd, (uint8_t*)cmd, strlen (cmd));
-
-  reply = ".\n";
-  send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+  //Send the positive preliminary response.
+  if (si->type == 'a') {
+    send_mesg_150 (csfd, cmd, REPLY_150_ASCII);
+  } else {
+    send_mesg_150 (csfd, cmd, REPLY_150_BINARY);
+  }
   
   /* Data connection must already exist. Note: In the future, if the PORT
    * command was specified previously to this command, the data connection
    * will be established at this point. */
   if (si->dsfd == 0) {
-    reply = "425 Use PORT or PASV first.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+    send_mesg_425 (csfd);
     return;
   }
   
@@ -189,7 +170,7 @@ static void store (session_info_t *si, char *cmd, char *purp)
       continue;
     
     //check if data port has rxed data
-    //NOTE: Check for recv errno. Will need to add reply message.
+    //TODO: Check for recv errno. Will need to add reply message.
     if (FD_ISSET (si->dsfd, &rfds)) {
       if ((rv = recv (si->dsfd, buffer, BUFFSIZE, 0)) > 0)
 	fwrite (buffer, sizeof(char), rv, storfile);
@@ -197,12 +178,10 @@ static void store (session_info_t *si, char *cmd, char *purp)
   }
   
   if (si->cmdAbort) {
-    reply = "426 Connection closed; transfer aborted.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+    send_mesg_426 (csfd);
     si->cmdAbort = false;
   } else {
-    reply = "226 Transfer Complete.\n";
-    send_all (si->csfd, (uint8_t*)reply, strlen (reply));
+    send_mesg_226 (csfd, REPLY_226_SUCCESS);
   }
   
   //Close the file and the data connection.
@@ -220,19 +199,14 @@ void cmd_retr (session_info_t *si, char *path)
   fd_set wfds;
   FILE *retrFile;
   bool fileCheck;
-  int retVal,
-      selVal;
+  int retVal;
+  int selVal;
   char buffer[BUFFSIZE];
-  char *aborted,
-       *fullpath,
-       *noAccess,
-       *noConnection,
-       *success,
-       *transferStart;
+  char *fullpath;
+  int csfd = si->csfd;
 
   if (si->loggedin == false) {
-    noAccess = "550 - Access denied.\n";
-    send_all(si->csfd, (uint8_t *)noAccess, strlen (noAccess));
+    send_mesg_530 (csfd, REPLY_530_REQUEST);
     return;
   }
 
@@ -241,12 +215,15 @@ void cmd_retr (session_info_t *si, char *path)
     return;
   }
 
-  transferStart = "150 - File status okay; about to open data connection.\n";
-  send_all (si->csfd, (uint8_t *)transferStart, strlen (transferStart));
+  //Send the positive preliminary response.
+  if (si->type == 'a') {
+    send_mesg_150 (csfd, path, REPLY_150_ASCII);
+  } else {
+    send_mesg_150 (csfd, path, REPLY_150_BINARY);
+  }
 
   if (si->dsfd == 0) {
-    noConnection = "425 - Cannot open data connection; please use the PORT or PASV command first.\n";
-    send_all(si->csfd, (uint8_t *)noConnection, strlen (noConnection));
+    send_mesg_425 (csfd);
     return;
   }
 
@@ -302,8 +279,9 @@ void cmd_retr (session_info_t *si, char *path)
 	}
       }
 
+      //Send the file over the data connection.
       if (send_all (si->dsfd, (uint8_t *)buffer, retVal) == -1) {
-	send_mesg_451 (si->csfd);
+	send_mesg_451 (csfd);
 	close (si->dsfd);
 	si->dsfd = 0;
 	return;
@@ -323,12 +301,10 @@ void cmd_retr (session_info_t *si, char *path)
   si->dsfd = 0;
 
   if (si->cmdAbort == true) {
-    aborted = "426 - Connection close; transfer aborted.\n";
-    send_all (si->csfd, (uint8_t *)aborted, strlen (aborted));
+    send_mesg_426 (csfd);
     si->cmdAbort = false;
   } else {
-    success = "226 - Closing data connection; requested file action successful.\n";
-    send_all (si->csfd, (uint8_t *)success, strlen (success));
+    send_mesg_226 (csfd, REPLY_226_SUCCESS);
   }
 
   return;
@@ -350,12 +326,11 @@ void cmd_retr (session_info_t *si, char *path)
 static int perm_neg_check (session_info_t *si, char *arg)
 {
   int pathCheck;
-  char *permdeny = "550 Permission denied.\n";
 
   /* If the client is anonymous or they haven't logged in, they don't have
    * permission to run this command. */
   if (si->loggedin == false || strcmp (si->user, "anonymous") == 0) {
-    send_all (si->csfd, (uint8_t*)permdeny, strlen (permdeny));
+    send_mesg_530 (si->csfd, REPLY_530_REQUEST);
     close (si->dsfd);
     si->dsfd = 0;
     return -1;

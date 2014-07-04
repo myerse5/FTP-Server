@@ -26,7 +26,7 @@ void *control_thread (void *arg) {
   int *csfd = arg;    //Control socket file descriptor.
 
   //Send the welcome message to the client.
-  while (send_welcome_mesg_220 (*csfd) != 0);
+  while (send_mesg_220 (*csfd) != 0);
 
   //Transfer control of the thread to session() to perform user commands.
   session (*csfd);

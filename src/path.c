@@ -372,7 +372,6 @@ bool is_a_dir (const char *fullpath)
 
   //stat() the file to determine if the file is a directory.
   if (stat (fullpath, &st) == -1) {
-    fprintf (stderr, "%s: stat: %s\n", __FUNCTION__, strerror (errno));
     return false;
   }
 

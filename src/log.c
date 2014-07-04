@@ -24,8 +24,10 @@ void log_received_cmd (char *user, char *cmd, char *arg, int numArgs)
 
   fprintf (stderr, "%s\tUser <%s>\n", asctime (timeInfo), user);
 
-  if (cmd == NULL) 
+  if (cmd == NULL) {
     fprintf (stderr, "\tERROR: Missing Command\n");
+    return;
+  }
 
   fprintf (stderr, "\tEntered Command <%s> with (%d) Argument(s) \"%s\"\n\n",
 	   cmd, (numArgs - 1), arg);

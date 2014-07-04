@@ -18,6 +18,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include "net.h"
+#include "reply.h"
 #include "session.h"
 #include "switch.h"
 #include "queue.h"
@@ -38,8 +39,6 @@ int session (int csfd)
   char commandstr[CMD_STRLEN];
   struct timeval timeout;
   fd_set rfds;
-
-  char *abort = "226 Abort.\n";
   
   pthread_attr_init (&attr);
 
@@ -89,7 +88,7 @@ int session (int csfd)
     if (strncasecmp (commandstr, "ABOR", 4) == 0) {
       sessioninfo.cmdAbort = true;
       commandstr[0] = '\0';
-      send_all (sessioninfo.csfd, (uint8_t*)abort, strlen (abort));
+      send_mesg_226 (csfd, REPLY_226_ABORT);
     }
     
     

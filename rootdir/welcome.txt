@@ -1,9 +1,3 @@
 This file will appear in the root directory of the FTP server.
 
-A different root directory for the server can be specified in the file
-"FTP-Server/config/ftp.conf".
-
-Users connected to the server will not be able to access any parent of this
-directory by using paths which include "..", "~/", etc. Symbolic links are
-also expanded and checked, and may not be used to access files that are not a
-descendant of the root directory of the server.
+A different root directory for the server can be specified in the file "FTP-Server/config/ftp.conf". Users connected to the server will not be able to access any parent of this directory by using paths which include "..", "~/", etc. Symbolic links are also expanded and checked, and may not be used to access files that are not a descendant of the root directory of the server.

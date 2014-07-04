@@ -174,7 +174,7 @@ int main (int argc, char *argv[])
    *    -The command "shutdown" is entered on the server console. */ 
   while (1) {
     if ((csfd = malloc (sizeof(*csfd))) == NULL) {
-      fprintf (stderr, "%s: malloc: could not allocate the required space\n", __FUNCTION__);
+      fprintf (stderr, "%s: malloc of %lu bytes failed\n", __FUNCTION__, sizeof(*csfd));
       break;
     }
 
@@ -182,8 +182,7 @@ int main (int argc, char *argv[])
     if ((*csfd = accept_connection (listenSfd, ACCEPT_CONTROL, NULL)) == -1) {
       free (csfd);
       continue;
-    } 
-    else if (*csfd == STDIN_READY) {   //There is something to read on stdin.
+    } else if (*csfd == STDIN_READY) {   //There is something to read on stdin.
       if (read_server_cmd () == SHUTDOWN_SERVER) {
 	shutdownServer = true;
 	free (csfd);

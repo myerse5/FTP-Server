@@ -24,7 +24,8 @@
 #include "session.h"
 
 
-#define MAX_FDATSZ 4096
+#define MAX_FDATSZ 4096  //TODO integrate into standard buffer size with an
+                         //actual error check involved.
 
 
 //Local function prototypes.
@@ -35,7 +36,7 @@ static int detail_list (struct dirent *dirInfo, char *fullpath, char **output);
 extern char *rootdir; //The root directory of the server, defined in 'main.c'.
 
 
-//TODO: What does this do? Why is this here?
+//TODO: integrate into standard buffer size with an actual error check involved.
 char fileBuff[MAX_FDATSZ];
 
 
@@ -45,35 +46,31 @@ char fileBuff[MAX_FDATSZ];
 void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
 {
   char *fullpath;
-  char *noAccess;
   char *transferStart;
-  char *noConnection;
+  int csfd = si->csfd;
   
-
- if (si->loggedin == false) {
-    noAccess = "550 - Access denied.\n";
-    send_all (si->csfd, (uint8_t *)noAccess, strlen (noAccess));
+  if (!si->loggedin) {
+    send_mesg_530 (csfd, REPLY_530_REQUEST);
     return;
   }
-
+  
   //Determine if the file is a directory.
   if (!check_dir_exist (si->cwd, arg)) {
-    send_mesg_553 (si->csfd);
+    send_mesg_553 (csfd);
     return;
   }
-
+  
   transferStart = "150 Here comes the directory listing.\n";
-  send_all (si->csfd, (uint8_t*)transferStart, strlen (transferStart));
+  send_all (csfd, (uint8_t*)transferStart, strlen (transferStart));
 
   if (si->dsfd == 0) {
-    noConnection = "425 - Cannot open data connection; please use the PORT or PASV command first.\n";
-    send_all (si->csfd, (uint8_t *)noConnection, strlen (noConnection));
+    send_mesg_425 (csfd);
     return;
   }
 
   //Create a single pathname to the directory from the pathname fragments.
   if ((fullpath = merge_paths (si->cwd, arg, NULL)) == NULL) {
-    send_mesg_451 (si->csfd);
+    send_mesg_451 (csfd);
     close (si->dsfd);
     si->dsfd = 0;
     return;
@@ -103,13 +100,14 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
   struct dirent *ep;             //entry pointer
   char *output;                  //output buffer
   int outSize = CMD_STRLEN;
-  char *aborted;
-  char *success;
+  int csfd;                      //Control socket file descriptor.
+
+  csfd = si->csfd;
 
   //Open the directory to be listed.
   if ((dp = opendir (fullpath)) == NULL) {
     fprintf (stderr, "%s: opendir: %s\n", __FUNCTION__, strerror (errno));
-    send_mesg_451 (si->csfd);
+    send_mesg_451 (csfd);
     close (si->dsfd);
     si->dsfd = 0;
     return;
@@ -118,16 +116,16 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
   //Create an output buffer.
   output = calloc (outSize, sizeof(*output));
   if(output == NULL){
-    fprintf (stderr, "Error in allocating memory for output in list.");
-    send_mesg_451 (si->csfd);
+    fprintf (stderr, "%s: calloc of %d bytes failed\n", __FUNCTION__, outSize);
+    send_mesg_451 (csfd);
     close (si->dsfd);
     si->dsfd = 0;
     return;
   }
 
-  //Read all entries from the directory.
   errno = 0;
-  while(((ep = readdir (dp)) != NULL) && (si->cmdAbort == false)) {
+  //Read all entries from the directory.
+  while ((ep = readdir (dp)) != NULL && (si->cmdAbort == false)) {
     //Do not list hidden files, current directory, or parent directory.
     if (ep->d_name[0] != '.') {
       //Create a detailed long listing, or a simple filename listing.
@@ -142,9 +140,9 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
       if (strlen (output) >= (outSize-356)) {
       	outSize += CMD_STRLEN;
       	if ((output = realloc (output, outSize * sizeof(*output))) == NULL) {
-	  fprintf (stderr, "%s: realloc: %s\n", __FUNCTION__,
-		   "could not allocate the required space");
-	  send_mesg_451 (si->csfd);
+	  fprintf (stderr, "%s: realloc of %d bytes failed\n",
+		   __FUNCTION__, outSize);
+	  send_mesg_451 (csfd);
 	  close (si->dsfd);
 	  si->dsfd = 0;
 	  return;
@@ -153,11 +151,12 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
     }
   }
 
-  //checks to see if its and error or eof
+  /* Send an error message and exit the if readdir() failed, proceed when ep
+   * returned NULL due to EOF. */
   if (ep == NULL) {
     if (errno) {
       fprintf (stderr, "%s: readdir: %s\n", __FUNCTION__, strerror (errno));
-      send_mesg_451 (si->csfd);
+      send_mesg_451 (csfd);
       close (si->dsfd);
       si->dsfd = 0;
       closedir (dp);
@@ -171,12 +170,10 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
 
   //Send the appropriate message if the command was aborted.
   if (si->cmdAbort == true) {
-    aborted = "426 - Connection close; transfer aborted.\n";
-    send_all (si->csfd, (uint8_t *)aborted, strlen (aborted));
+    send_mesg_426 (csfd);
     si->cmdAbort = false;
   } else {
-    success = "226 - Closing data connection; requested file action successful.\n";
-    send_all (si->csfd, (uint8_t *)success, strlen (success));
+    send_mesg_226 (csfd, REPLY_226_SUCCESS);
   }
 
   //Clean up before returning.
@@ -211,7 +208,8 @@ static int detail_list (struct dirent *dirInfo, char *fullpath, char **output)
   struct tm * timeinfo;
   errno = 0;
 
-  //Add the size of d_name field in struct stat, + 1 for a null terminator.
+  /* Add the size of d_name field in struct stat (255), + 1 for a null
+   * terminator, to the fullpath of the cwd. */
   char filename[strlen (fullpath) + 256];
   filename[0] = '\0';
   strcat (filename, fullpath);
@@ -219,13 +217,13 @@ static int detail_list (struct dirent *dirInfo, char *fullpath, char **output)
 
   // Check to see if stat() encountered any error
   if (stat (filename, &fileStat) == -1) {
-    fprintf (stderr, "Error using stat function: %s\n", strerror (errno));
+    fprintf (stderr, "%s: stat: %s\n", __FUNCTION__, strerror (errno));
     return -1;
   }
 
   //Prepare the time returned from stat for a call to strftime().
   if ((timeinfo = gmtime (&fileStat.st_mtime)) == NULL) {
-    fprintf (stderr, "%s: gmtime: error with function call\n", __FUNCTION__);
+    fprintf (stderr, "%s: gmtime: failed\n", __FUNCTION__);
     return -1;
   }
   strftime (time, 20, "%b %d %Y", timeinfo);
@@ -264,10 +262,12 @@ static int detail_list (struct dirent *dirInfo, char *fullpath, char **output)
  *****************************************************************************/
 void cmd_mkd (session_info_t *si, char * filepath)
 {
-  mode_t permissions = 0;
-  char *response = "550 Please login with USER and PASS.\n";
+  mode_t permissions;
+  char *outpath;
+  int csfd = si->csfd;       //Control socket file descriptor.
 
   //Sets permission for the new folder being created.
+  permissions = 0;
   permissions = permissions | S_IRUSR;
   permissions = permissions | S_IWUSR;
   permissions = permissions | S_IXUSR;
@@ -275,14 +275,14 @@ void cmd_mkd (session_info_t *si, char * filepath)
   // Checks to make sure that only a logged in user can make a
   // new directory as well as the user is NOT anonymous.
   if (si->loggedin == false || strcmp (si->user, "anonymous") == 0) {
-    send_all (si->csfd, (uint8_t *)response, strlen (response));
+    send_mesg_530 (csfd, REPLY_530_REQUEST);
     close (si->dsfd);
     si->dsfd = 0;
     return;
   }
 
   if ((filepath = merge_paths (si->cwd, filepath, NULL)) == NULL) {
-    fprintf (stderr, "%s: mkdir: filepath merge error\n", __FUNCTION__);
+    fprintf (stderr, "%s: merge_paths: filepath merge error\n", __FUNCTION__);
     close (si->dsfd);
     si->dsfd = 0;
     return;
@@ -290,7 +290,7 @@ void cmd_mkd (session_info_t *si, char * filepath)
 
   if (mkdir (filepath, permissions) == -1) {
     fprintf (stderr, "%s: mkdir: %s\n", __FUNCTION__, strerror (errno));
-    send_mesg_550 (si->csfd);
+    send_mesg_550_process_error (csfd);
     close (si->dsfd);
     si->dsfd = 0;
     free (filepath);
@@ -300,14 +300,20 @@ void cmd_mkd (session_info_t *si, char * filepath)
   /* Trims and modified the displayed filepath of the new directory so that it
    * will not display the path above the specified root directory and root
    * directory is displayed as "/". */
-  char * printStart = "257 - ";
-  char * printEnd = "/ \n";
-  char * root = rootdir;
-  char * outpath = strstr (filepath, root);
-  outpath += strlen (root);
-  send_all (si->csfd, (uint8_t *)printStart, strlen (printStart));
-  send_all (si->csfd, (uint8_t *)outpath, strlen (outpath));
-  send_all (si->csfd, (uint8_t *)printEnd, strlen (printEnd));
+  outpath = strstr (filepath, rootdir);
+  outpath += strlen (rootdir);
+  send_mesg_257 (csfd, outpath);
+
+  /* TESTING send_mesg_257, block commented out before being deleted.
+   * char *printStart = "257 - ";
+   * char *printEnd = "/ \n";
+   * char *root = rootdir;
+   * char *outpath = strstr (filepath, root);
+   * outpath += strlen (root);
+   * send_all (si->csfd, (uint8_t *)printStart, strlen (printStart));
+   * send_all (si->csfd, (uint8_t *)outpath, strlen (outpath));
+   *send_all (si->csfd, (uint8_t *)printEnd, strlen (printEnd));
+   */
 
   free (filepath);
   return;
@@ -319,18 +325,16 @@ void cmd_mkd (session_info_t *si, char * filepath)
  *****************************************************************************/
 void cmd_cdup (session_info_t *si, char *arg)
 {
-  char *response;
   char up[10];
+  int csfd = si->csfd;
 
   if (si->loggedin == false) {
-    response = "550 - Must login with USER and PASS.\n";
-    send_all (si->csfd, (uint8_t *)response, strlen (response));
+    send_mesg_530 (csfd, REPLY_530_REQUEST);
     return;
   }
 
   if (arg != NULL) {
-    response = "550 No argument allowed.\n";
-    send_all (si->csfd, (uint8_t *)response, strlen (response));
+    send_mesg_550_no_argument (csfd);
     return;
   }
 
@@ -347,28 +351,25 @@ void cmd_cdup (session_info_t *si, char *arg)
  *****************************************************************************/
 void cmd_cwd (session_info_t *si, char *arg)
 {
-  char *response;
   char *fullpath;
   char *canon;
+  int csfd  = si->csfd;
 
   if (si->loggedin == false) {
-    response = "550 Please login with USER and PASS.\n";
-    send_all (si->csfd, (uint8_t *)response, strlen (response));
+    send_mesg_530 (csfd, REPLY_530_REQUEST);
     return;
   }
   
   /* Determine if the file is a directory and within the server root directory
    * which can be found in the file 'ftp.conf'. */
   if (!check_dir_exist (si->cwd, arg)) {
-    response = "550 Directory not found.\n";
-    send_all (si->csfd, (uint8_t *)response, strlen (response));
+    send_mesg_550_no_dir (csfd);
     return;
   }
 
   //Create a single pathname to the directory from the pathname fragments.
   if ((fullpath = merge_paths (si->cwd, arg, NULL)) == NULL) {
-    response = "550 Error while processing.\n";
-    send_all (si->csfd, (uint8_t *)response, strlen (response));
+    send_mesg_550_process_error (csfd);
     return;
   }
 
@@ -376,8 +377,7 @@ void cmd_cwd (session_info_t *si, char *arg)
    * multiple ".." entries in the pathname, making it difficult for the client
    * to determine where they are. */
   if ((canon = canonicalize_file_name (fullpath)) == NULL) {
-    response = "550 Error while processing.\n";
-    send_all (si->csfd, (uint8_t *)response, strlen (response));
+    send_mesg_550_process_error (csfd);
     free (fullpath);
     return;
   }
@@ -387,11 +387,10 @@ void cmd_cwd (session_info_t *si, char *arg)
    * modified in this process. */
   strcat (si->cwd, canon + strlen (rootdir));
   /* The implementation of our paths require cwd to always be followed by a
-   * directory separator. (rootdir  --->   / <<cwd>/>  ----> argument) */
+   * directory separator. (rootdir="/" --->  <<cwd>/>  ----> argument) */
   strcat (si->cwd, "/");
 
-  response = "250 Working directory changed.\n";
-  send_all (si->csfd, (uint8_t *)response, strlen (response));
+  send_mesg_250 (csfd);
   
   free (fullpath);
   free (canon);
@@ -403,10 +402,14 @@ void cmd_cwd (session_info_t *si, char *arg)
  *****************************************************************************/
 void cmd_pwd (session_info_t *si)
 {
-  char *printStart = "257 - \"",
-       *printEnd = "\".\n";
-  
-  send_all (si->csfd, (uint8_t *)printStart, strlen (printStart));
-  send_all (si->csfd, (uint8_t *)si->cwd, strlen (si->cwd));
-  send_all (si->csfd, (uint8_t *)printEnd, strlen (printEnd));
+  send_mesg_257 (si->csfd, si->cwd);
+
+  /* THIS IS COMMENTED OUT WHILE TESTING send_mesg_257 ()
+   * char *printStart = "257 - \"";
+   * char *printEnd = "\".\n";
+   * 
+   * send_all (si->csfd, (uint8_t *)printStart, strlen (printStart));
+   * send_all (si->csfd, (uint8_t *)si->cwd, strlen (si->cwd));
+   * send_all (si->csfd, (uint8_t *)printEnd, strlen (printEnd));
+   */
 }

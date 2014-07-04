@@ -4,11 +4,12 @@
  * Date: November 2013
  *
  * Description: 
- *    The functions found in this file send a response message to the client
- *    over the control connection socket. They were created to remove
- *    repetition in places where a response message is sent. Also, this will
- *    help ensure that all messages that are meant to send the same data will
- *    do so.
+ *    All response messages sent to the client can be found in this file. All
+ *    communication sent by the server to the client on the control connection
+ *    is sent by a function found in this file.
+ *
+ *    This has been done to ensure all communication is consistent, and to
+ *    make modififying these responses easier.
  *****************************************************************************/
 #include <string.h>
 #include <stdio.h>
@@ -18,68 +19,182 @@
 
 /* A response message sent over the control connection should fit on a
  * standard, default terminal line. */
-#define STD_TERM_SZ 80  //The standard number of characters in a terminal line.
+#define STD_TERM_SZ 80  //Use for one line replies where length is not known.
 
 
 /******************************************************************************
- * send_welcome_mesg_220 - see "reply.h"
+ * send_mesg_150 - see "reply.h"
  *****************************************************************************/
-int send_welcome_mesg_220 (int c_sfd)
+int send_mesg_150 (int csfd, const char *filename, char option)
 {
-  uint8_t mesg[] = "220 FTP server ready.\n";
-  int mesg_len;
+  char *reply;
+  int mesgLen;
 
-  //Send the complete response message.
-  mesg_len = strlen ((char *)mesg);
-  if (send_all (c_sfd, mesg, mesg_len) == -1) {
+  if (option == REPLY_150_ASCII) {
+    reply = "150 Opening ASCII mode data connection for ";
+  } else if (option == REPLY_150_BINARY) {
+    reply = "150 Opening BINARY mode data connection for ";
+  }
+
+  mesgLen = strlen (reply);
+  if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1)
+    return -1;
+
+  mesgLen = strlen (filename);
+  if (send_all (csfd, (uint8_t*)filename, mesgLen) == -1)
+    return -1;
+
+  reply = "\n";
+  mesgLen = strlen (reply);
+  if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1)
+    return -1;
+
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_200 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_200 (int csfd, char option)
+{
+  char *reply;
+  int mesgLen;
+
+  if (option == REPLY_200_PORT) {
+    reply = "200 PORT command successful. Consider using PASV.\n";
+  } else if (option == REPLY_200_ASCII) {
+    reply = "200 Switching to ASCII mode.\n";
+  } else if (option == REPLY_200_IMAGE) {
+    reply = "200 Switching to Image mode.\n";
+  } else if (option == REPLY_200_STREAM) {
+    reply = "200 Switching to stream mode.\n";
+  } else if (option == REPLY_200_FSTRU) {
+    reply = "200 - Switching to File Structure.\n";
+  }
+
+  mesgLen = strlen (reply);
+  if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1) {
     return -1;
   }
-  
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_215 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_215 (int csfd)
+{
+  uint8_t mesg[] = "215 UNIX Type: L8\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_220 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_220 (int csfd)
+{
+  uint8_t mesg[] = "220 FTP server ready.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1)
+    return -1;
+
   return 0;
 }
 
 /******************************************************************************
  * send_mesg_214_general - see reply.h
  *****************************************************************************/
-void send_mesg_214_general (int csfd)
+int send_mesg_214_general (int csfd)
 {
-  const char *helpMsgStart = "\n214 - Help message.\n",
-    *row1 = "The following commands may be abbreviated.\n"
-            "The available commands are:\n",
-    *row2 = "\tABOR\tHELP\tPASV\tRMD\tSTOU\n",
-    *row3 = "\tACCT\tLIST\tPORT\tRNFR\tSTRU\n",
-    *row4 = "\tALLO\tMKD\tPWD\tRNTO\tSYST\n",
-    *row5 = "\tAPPE\tMODE\tQUIT\tSITE\tTYPE\n",
-    *row6 = "\tCDUP\tNLST\tREIN\tSMNT\tUSER\n",
-    *row7 = "\tCWD\tNOOP\tREST\tSTAT\n",
-    *row8 = "\tDELE\tPASS\tRETR\tSTOR\n",
-    *helpMsgEnd = "214 - Help is OK.\n\n";
+  int mesgLen;
+  uint8_t mesg[] =
+    "214-The following commands are recognized.\n"
+    " APPE CDUP CWD  HELP LIST MKD  MODE NLST PASS PASV PORT PWD  QUIT RETR\n"
+    " STOR STOU STRU SYST TYPE USER\n"
+    "214 Help OK.\n";
 
-    send_all (csfd, (uint8_t *)helpMsgStart, strlen (helpMsgStart));
-    send_all (csfd, (uint8_t *)row1, strlen (row1));
-    send_all (csfd, (uint8_t *)row2, strlen (row2));
-    send_all (csfd, (uint8_t *)row3, strlen (row3));
-    send_all (csfd, (uint8_t *)row4, strlen (row4));
-    send_all (csfd, (uint8_t *)row5, strlen (row5));
-    send_all (csfd, (uint8_t *)row6, strlen (row6));
-    send_all (csfd, (uint8_t *)row7, strlen (row7));
-    send_all (csfd, (uint8_t *)row8, strlen (row8));
-    send_all (csfd, (uint8_t *)helpMsgEnd, strlen (helpMsgEnd));
+  mesgLen = strlen ((char*)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
 }
 
 
 /******************************************************************************
  * send_mesg_214_specific - see reply.h
  *****************************************************************************/
-void send_mesg_214_specific (int csfd, char *syntax, char *info)
+int send_mesg_214_specific (int csfd, char *syntax, char *info)
 {
-  const char *helpMesgEnd = "214 - Help is OK.\n\n";
-  const char *helpMesgStart = "\n214 - Help message.\n";
+  char *reply;
+  int mesgLen;
 
-  send_all (csfd, (uint8_t *)helpMesgStart, strlen (helpMesgStart));
-  send_all (csfd, (uint8_t *)syntax, strlen (syntax));
-  send_all (csfd, (uint8_t *)info, strlen (info));
-  send_all (csfd, (uint8_t *)helpMesgEnd, strlen (helpMesgEnd));
+  reply = "214 - Help is OK.\n\n";
+  mesgLen = strlen (reply);
+  if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1)
+    return -1;
+
+  if (send_all (csfd, (uint8_t*)syntax, strlen (syntax)) == -1)
+    return -1;
+
+  if (send_all (csfd, (uint8_t*)info, strlen (info)) == -1)
+    return -1;
+
+  reply = "\n214 - Help message.\n";
+  mesgLen = strlen (reply);
+  if (send_all (csfd, (uint8_t*)reply, strlen (reply)) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_221 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_221 (int csfd)
+{
+  uint8_t mesg[] = "221 - Quitting system; goodbye.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_226 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_226 (int csfd, char option)
+{
+  char *reply;
+  int mesgLen;
+
+  if (option == REPLY_226_ABORT) {
+    reply = "226 Abort successful.\n";
+  } else if (option == REPLY_226_SUCCESS) {
+    reply = "226 Closing data connection; requested file action successful.\n";
+  }
+
+  mesgLen = strlen (reply);  
+  if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
 }
 
 
@@ -134,18 +249,130 @@ int send_mesg_227 (int csfd, int dsfd)
   p2 = (sa.sin_port & 0x00FF);
 
   //Create the feedback message, code 227.
-  sprintf ((char *)mesg, "227 Entering Passive Mode (%d,%d,%d,%d,%d,%d).\n", 
+  sprintf ((char*)mesg, "227 %d,%d,%d,%d,%d,%d\n", 
 	   h1, h2, h3, h4, p1, p2);
 
-  mesgLen = strlen ((char *)mesg);
+  mesgLen = strlen ((char*)mesg);
   //Send the feedback message to the control socket.
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
-
   return 0;
 }
 
+
+/******************************************************************************
+ * send_mesg_230 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_230 (int csfd, char option)
+{
+  char *reply;
+  int mesgLen;
+
+  if (option == REPLY_230_NONEED) {
+    reply = "230 Already logged in.\n";
+  } else if (option == REPLY_230_SUCCESS) {
+    reply = "230 Login successful.\n";
+  }
+
+  mesgLen = strlen (reply);
+  if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_250 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_250 (int csfd)
+{
+  uint8_t mesg[] = "250 Working directory changed.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);  
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_257 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_257 (int csfd, const char *directory)
+{
+  uint8_t mesgStart[] = "257 ";
+  uint8_t mesgEnd[] = "\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesgStart);  
+  if (send_all (csfd, mesgStart, mesgLen) == -1) {
+    return -1;
+  }
+
+  mesgLen = strlen (directory);
+  if (send_all (csfd, (uint8_t*)directory, mesgLen) == -1) {
+    return -1;
+  }
+
+  mesgLen = strlen ((char*)mesgEnd);
+  if (send_all (csfd, mesgEnd, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_331 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_331 (int csfd)
+{
+  uint8_t mesg[] = "331 User name okay, need password.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);  
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_425 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_425 (int csfd)
+{
+  uint8_t mesg[] = "425 - Cannot open data connection; please use the PORT or "
+                   "PASV command first.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);  
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_426 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_426 (int csfd)
+{
+  uint8_t mesg[] = "426 - Connection close; transfer aborted.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);  
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
 
 /******************************************************************************
  * send_mesg_450 - see "reply.h"
@@ -155,8 +382,7 @@ int send_mesg_450 (int csfd)
   uint8_t mesg[] = "450 Requested file action not taken. File unavailable.\n";
   int mesgLen;
 
-  //Send the complete response message.
-  mesgLen = strlen ((char *)mesg);  
+  mesgLen = strlen ((char*)mesg);  
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
@@ -172,8 +398,7 @@ int send_mesg_451 (int csfd)
   uint8_t mesg[] = "451 Requested action aborted. Local error in processing.\n";
   int mesgLen;
 
-  //Send the complete response message.
-  mesgLen = strlen ((char *)mesg);  
+  mesgLen = strlen ((char*)mesg);  
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
@@ -189,8 +414,7 @@ int send_mesg_500 (int csfd)
   uint8_t mesg[] = "500 Syntax error, command unrecognized.\n";
   int mesgLen;
 
-  //Send the complete response message.
-  mesgLen = strlen ((char *)mesg);  
+  mesgLen = strlen ((char*)mesg);  
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
@@ -206,8 +430,7 @@ int send_mesg_501 (int csfd)
   uint8_t mesg[] = "501 Syntax error in parameters or arguments.\n";
   int mesgLen;
 
-  //Send the complete response message.
-  mesgLen = strlen ((char *)mesg);
+  mesgLen = strlen ((char*)mesg);
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
@@ -216,15 +439,30 @@ int send_mesg_501 (int csfd)
 
 
 /******************************************************************************
- * send_mesg_502 - see "reply.h"
+ * send_mesg_503 - see "reply.h"
  *****************************************************************************/
-int send_mesg_502 (int csfd)
+int send_mesg_503 (int csfd)
 {
-  uint8_t mesg[] = "502 - Command is not currently implemented.\n";
+  uint8_t mesg[] = "503 Login with USER first.\n";
   int mesgLen;
 
-  //Send the complete response message.
-  mesgLen = strlen ((char *)mesg);
+  mesgLen = strlen ((char*)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_504 - see "reply.h"
+ *****************************************************************************/
+int send_mesg_504 (int csfd)
+{
+  uint8_t mesg[] = "504 - Command is not currently implemented.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
@@ -235,13 +473,35 @@ int send_mesg_502 (int csfd)
 /******************************************************************************
  * send_mesg_530 - see "reply.h"
  *****************************************************************************/
-int send_mesg_530 (int csfd)
+int send_mesg_530 (int csfd, char option)
 {
-  uint8_t mesg[] = "530 Please login with USER and PASS.\n";
+  char *reply;
   int mesgLen;
 
-  //Send the complete response message.
-  mesgLen = strlen ((char *)mesg);
+  if (option == REPLY_530_REQUEST) {
+    reply = "530 Please login with USER and PASS.\n";
+  } else if (option == REPLY_530_FAIL) {
+    reply = "530 Not logged in.\n";
+  }
+
+  mesgLen = strlen (reply);
+  if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1) {
+    return -1;
+  }
+
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_550_no_argument - see "reply.h"
+ *****************************************************************************/
+int send_mesg_550_no_argument (int csfd)
+{
+  uint8_t mesg[] = "550 - No argument allowed.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
@@ -250,15 +510,46 @@ int send_mesg_530 (int csfd)
 
 
 /******************************************************************************
- * send_mesg_550 - see "reply.h"
+ * send_mesg_550_no_dir - see "reply.h"
  *****************************************************************************/
-int send_mesg_550 (int csfd)
+int send_mesg_550_no_dir (int csfd)
+{
+  uint8_t mesg[] = "550 Directory not found.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_550_process_error - see "reply.h"
+ *****************************************************************************/
+int send_mesg_550_process_error (int csfd)
+{
+  uint8_t mesg[] = "550 Error while processing.\n";
+  int mesgLen;
+
+  mesgLen = strlen ((char*)mesg);
+  if (send_all (csfd, mesg, mesgLen) == -1) {
+    return -1;
+  }
+  return 0;
+}
+
+
+/******************************************************************************
+ * send_mesg_550_unavailable - see "reply.h"
+ *****************************************************************************/
+int send_mesg_550_unavailable (int csfd)
 {
   uint8_t mesg[] = "550 Requested action not taken. File unavailable.\n";
   int mesgLen;
 
-  //Send the complete response message.
-  mesgLen = strlen ((char *)mesg);
+  mesgLen = strlen ((char*)mesg);
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }
@@ -274,8 +565,7 @@ int send_mesg_553 (int csfd)
   uint8_t mesg[] = "553 Requested action not taken. File name not allowed.\n";
   int mesgLen;
 
-  //Send the complete response message.
-  mesgLen = strlen ((char *)mesg);
+  mesgLen = strlen ((char*)mesg);
   if (send_all (csfd, mesg, mesgLen) == -1) {
     return -1;
   }

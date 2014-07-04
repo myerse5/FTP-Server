@@ -21,7 +21,7 @@ queue* add_to_queue (char *commandstr, queue *cmdQueuePtr)
   queue *temp;
   queue *newptr = malloc (sizeof (queue));
   if (!newptr) {
-    fprintf (stderr, "%s: malloc: could not allocate the required space\n", __FUNCTION__);
+    fprintf (stderr, "%s: malloc of %lu bytes failed\n", __FUNCTION__, sizeof(queue));
     return cmdQueuePtr;
   }
   strcpy (newptr->cmd, commandstr);

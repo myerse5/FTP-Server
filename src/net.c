@@ -246,7 +246,7 @@ int accept_connection (int listenSfd, int mode, session_info_t *si)
 /******************************************************************************
  * cmd_pasv - see net.h
  *****************************************************************************/
-int cmd_pasv (session_info_t *session)
+int cmd_pasv (session_info_t *si)
 {
   //The setting to be searched for in the config file.
   char *interfaceSetting = "INTERFACE_CONFIG";
@@ -255,19 +255,21 @@ int cmd_pasv (session_info_t *session)
   //The IPv4 address of the configuration file interface.
   char interfaceAddr[INET_ADDRSTRLEN];
 
+  int csfd = si->csfd;
+
   //Ensure the client has logged in.
-  if (!session->loggedin) {
-    send_mesg_530 (session->csfd);
+  if (!si->loggedin) {
+    send_mesg_530 (csfd, REPLY_530_REQUEST);
     return -1;
   }
 
   /* The server "MUST" close the data connection port when:
    * "The port specification is changed by a command from the user".
    * Source: RFC 959 page 19 */
-  if (session->dsfd > 0) {
-    if (close (session->dsfd) == -1)
+  if (si->dsfd > 0) {
+    if (close (si->dsfd) == -1)
       fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
-    session->dsfd = 0;
+    si->dsfd = 0;
   }
 
   //Read the config file to find which interface to use to make the socket.
@@ -286,26 +288,24 @@ int cmd_pasv (session_info_t *session)
 
 
   //Create a socket that will listen for a data connection from a client.
-  if ((session->dsfd = get_pasv_sock (interfaceAddr, NULL)) == -1) {
+  if ((si->dsfd = get_pasv_sock (interfaceAddr, NULL)) == -1) {
     return -1;
   }
 
   //Send the data connection address information to the control socket.
-  if (send_mesg_227 (session->csfd, session->dsfd) == -1) {
-    close (session->dsfd);
-    session->dsfd = 0;
+  if (send_mesg_227 (csfd, si->dsfd) == -1) {
+    close (si->dsfd);
+    si->dsfd = 0;
     return -1;
   }
  
   //Accept a connection from the client on the listening socket.
-  if ((session->dsfd = accept_connection (session->dsfd,
-					  ACCEPT_PASV,
-					  session)) == -1) {
-    session->dsfd = 0;
-    return -1;
+  if ((si->dsfd = accept_connection (si->dsfd, ACCEPT_PASV, si)) == -1) {
+  si->dsfd = 0;
+  return -1;
   }
 
-  return session->dsfd;
+  return si->dsfd;
 }
 
 
@@ -433,35 +433,34 @@ static int get_pasv_sock (const char *address, const char *port)
 /******************************************************************************
  * cmd_port - see net.h
  *****************************************************************************/
-int cmd_port (session_info_t *session, char *cmdStr)
+int cmd_port (session_info_t *si, char *cmdStr)
 {
   int cmdStrLen;  //The length of the command string.
+  int csfd = si->csfd;
 
   //The data connection address to connect to.
   char hostname[INET_ADDRSTRLEN];  //Maximum size of an IPv4 dot notation addr.
   char service[MAX_PORT_STR];
 
-  char *portsuccess = "200 PORT command successful. Consider using PASV.\n";
-
   //The port command must have an argument.
   if (cmdStr == NULL) {
-    send_mesg_501 (session->csfd);
+    send_mesg_501 (csfd);
     return -1;
   }
 
   //Ensure the client has logged in.
-  if (!session->loggedin) {
-    send_mesg_530 (session->csfd);
+  if (!si->loggedin) {
+    send_mesg_530 (csfd, REPLY_530_REQUEST);
     return -1;
   }
 
   /* The server "MUST" close the data connection port when: 
    * "The port specification is changed by a command from the user".
    * Source: RFC 959 page 19 */
-  if (session->dsfd > 0) {
-    if (close (session->dsfd) == -1)
+  if (si->dsfd > 0) {
+    if (close (si->dsfd) == -1)
       fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
-    session->dsfd = 0;
+    si->dsfd = 0;
   }
 
   /* Filter invalid PORT arguments by comparing the length of the argument. Too
@@ -469,27 +468,26 @@ int cmd_port (session_info_t *session, char *cmdStr)
    * argument is invalid. */
   if ((cmdStrLen = strlen (cmdStr)) < (MIN_PORT_STR_LEN - 1)) {
     fprintf (stderr, "%s: PORT argument too short\n", __FUNCTION__);
-    send_mesg_501 (session->csfd);
+    send_mesg_501 (csfd);
     return -1;
   } else if (cmdStrLen > (MAX_PORT_STR_LEN - 1)) {
     fprintf (stderr, "%s: PORT argument too long\n", __FUNCTION__);
-    send_mesg_501 (session->csfd);
+    send_mesg_501 (csfd);
     return -1;
   }    
 
   //Convert the address h1,h2,h3,h4,p1,p2 into a hostname and service.
-  if (get_port_address (session->csfd, &hostname, &service, cmdStr) == -1) {
+  if (get_port_address (csfd, &hostname, &service, cmdStr) == -1) {
     return -1;
   }
-  send_all (session->csfd,(uint8_t*)portsuccess, strlen (portsuccess));
 
   //Create a data connection to the hostname and service provided by the client.
-  if ((session->dsfd = port_connect (hostname, service)) == -1) {
-    //Error message code to control socket.
+  if ((si->dsfd = port_connect (hostname, service)) == -1) {
     return -1;
   }
+  send_mesg_200 (csfd, REPLY_200_PORT);
   
-  return session->dsfd;
+  return si->dsfd;
 }
 
 

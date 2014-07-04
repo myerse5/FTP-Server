@@ -28,7 +28,7 @@ main.o:		main.c config.h ctrlthread.h net.h servercmd.h
 
 md5.o:		md5.c common.h md5.h
 
-misc.o: 	misc.c misc.h net.h session.h
+misc.o: 	misc.c misc.h net.h reply.h session.h
 
 net.o:		net.c config.h net.h reply.h session.h
 
@@ -42,13 +42,13 @@ reply.o:	reply.c net.h reply.h
 
 servercmd.o:	servercmd.c config.h ctrlthread.h net.h servercmd.h
 
-session.o:	session.c net.h session.h switch.h queue.h
+session.o:	session.c net.h reply.h session.h switch.h queue.h
 
 switch.o: 	switch.c directory.h help.h log.h misc.h net.h parser.h reply.h session.h switch.h transfer.h user.h
 
 transfer.o: 	transfer.c net.h path.h reply.h session.h transfer.h
 
-user.o:	user.c config.h md5.h net.h session.h user.h
+user.o:	user.c config.h md5.h net.h reply.h session.h user.h
 
 
 #Clean up the repository.
