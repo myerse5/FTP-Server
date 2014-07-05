@@ -31,45 +31,29 @@
 /******************************************************************************
  * Socket connection/creation constants.
  *****************************************************************************/
-#define BACKLOG 10      // Maximum number of clients queued for accept(2).
+#define BACKLOG 50      /* Maximum number of clients queued for accept(2).
+			 * TODO: Tie this value to the maximum concurrent user
+			 *       count when implemented or higher, do some
+			 *       research when the time comes. */
 
 
 /******************************************************************************
  * PORT command error checking constants.
  *****************************************************************************/
-/* The maximum string length of a PORT command (including the arguments).
- * (6 three digit fields) + (5 commas) + (null terminator) */
-#define MAX_PORT_STR_LEN ((6*3) + 5 + 1)
-
-/* The minimum string length of a PORT command (including the arguments).
- * (PORT + space) + (6 one digit fields) + (5 commas) + (newline + null) */
-#define MIN_PORT_STR_LEN ((6*1) + 5 + 1)
-
-// The number of byte values in the PORT command arg. PORT h1,h2,h3,h4,h5,h6
+/* The number of byte value fields in the PORT command argument.
+ * h1,h2,h3,h4,h5,h6 = 6 comma separated fields. */
 #define PORT_BYTE_ARGS 6
 
-
-/******************************************************************************
- * Various maximum value constants.
- *****************************************************************************/
-#define MAX_8_BIT  255  // The maximum 8-bit value
+// The maximum 8-bit value
+#define MAX_8_BIT  255
 
 
 /******************************************************************************
  * Local function prototypes.
  *****************************************************************************/
-// Used by cmd_pasv().
 static int get_pasv_sock (const char *address, const char *port);
-
-// Used by cmd_port().
-static int get_port_address (int csfd,
-			     char (*hostname)[INET_ADDRSTRLEN], 
-			     char (*service)[MAX_PORT_STR], 
-			     char *cmd_str);
-
-// Used by cmd_port().
 static int port_connect (char *hostname, char *service);
-
+static int get_port_address (int csfd, char **addr, char **portStr, char *arg);
 
 /******************************************************************************
  * get_control_sock - see net.h
@@ -236,7 +220,7 @@ int accept_connection (int listenSfd, int mode, session_info_t *si)
    * accepted, close the listening socket. */
   if (mode == ACCEPT_PASV) {
     if (close (listenSfd) == -1)
-      fprintf (stderr, "%s: ending close: %s\n", __FUNCTION__, strerror (errno));
+      fprintf (stderr, "%s: ending close: %s\n", __FUNCTION__, strerror(errno));
   }
   
   return acceptedSfd;  // Return the accepted socket file descriptor.
@@ -404,7 +388,7 @@ static int get_pasv_sock (const char *address, const char *port)
 
   optval = 1;
   // Set the socket option to reuse port while in the TIME_WAIT state.
-  if (setsockopt (sfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval)) == -1) {
+  if (setsockopt (sfd, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) ==-1){
     fprintf (stderr, "%s: setsockopt: %s\n", __FUNCTION__, strerror (errno));
     return -1;
   }
@@ -433,17 +417,17 @@ static int get_pasv_sock (const char *address, const char *port)
 /******************************************************************************
  * cmd_port - see net.h
  *****************************************************************************/
-int cmd_port (session_info_t *si, char *cmdStr)
+int cmd_port (session_info_t *si, char *arg)
 {
-  int cmdStrLen;  // The length of the command string.
+  int argLen;  // The length of the command string.
   int csfd = si->csfd;
 
   // The data connection address to connect to.
-  char hostname[INET_ADDRSTRLEN];  // Maximum size of an IPv4 dot notation addr.
-  char service[MAX_PORT_STR];
+  char *hostname = (si->connInfo).hostname;
+  char *port = (si->connInfo).port;
 
   // The port command must have an argument.
-  if (cmdStr == NULL) {
+  if (arg == NULL) {
     send_mesg_501 (csfd);
     return -1;
   }
@@ -457,7 +441,7 @@ int cmd_port (session_info_t *si, char *cmdStr)
   /* The server "MUST" close the data connection port when: 
    * "The port specification is changed by a command from the user".
    * Source: RFC 959 page 19 */
-  if (si->dsfd > 0) {
+  if (si->dsfd != 0) {
     if (close (si->dsfd) == -1)
       fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
     si->dsfd = 0;
@@ -466,27 +450,30 @@ int cmd_port (session_info_t *si, char *cmdStr)
   /* Filter invalid PORT arguments by comparing the length of the argument. Too
    * many or too little number of characters in the string means that the
    * argument is invalid. */
-  if ((cmdStrLen = strlen (cmdStr)) < (MIN_PORT_STR_LEN - 1)) {
+  if ((argLen = strlen (arg)) < (MIN_CMDPORT_ARG_STRLEN - 1)) {
     fprintf (stderr, "%s: PORT argument too short\n", __FUNCTION__);
     send_mesg_501 (csfd);
     return -1;
-  } else if (cmdStrLen > (MAX_PORT_STR_LEN - 1)) {
+  } else if (argLen > (MAX_CMDPORT_ARG_STRLEN - 1)) {
     fprintf (stderr, "%s: PORT argument too long\n", __FUNCTION__);
     send_mesg_501 (csfd);
     return -1;
-  }    
+  }
 
-  // Convert the address h1,h2,h3,h4,p1,p2 into a hostname and service.
-  if (get_port_address (csfd, &hostname, &service, cmdStr) == -1) {
+  // Convert the address h1,h2,h3,h4,p1,p2 into a hostname and port.
+  if (get_port_address (csfd, &hostname, &port, arg) == -1) {
     return -1;
   }
 
+  // TODO: This section will go around the 426 message in transfer commands
+  //       INSTEAD of this current location.
   // Establish the data connection to the hostname and service.
-  if ((si->dsfd = port_connect (hostname, service)) == -1) {
+  if ((si->dsfd = port_connect (hostname, port)) == -1) {
     return -1;
   }
   send_mesg_200 (csfd, REPLY_200_PORT);
   
+  // TODO: si->dsfd may NOT be set by this function.
   return si->dsfd;
 }
 
@@ -499,30 +486,23 @@ int cmd_port (session_info_t *si, char *cmdStr)
  * decimal values of each byte in the hostname and p1-p2 are the high and low
  * order bytes of the 16bit integer port.
  *
- * The argument 'cmdStr' is the command received by the server on the control
- * connection. The command string must be passed to this function in its
- * entirety.
- *
  * Arguments:
  *      csfd - The socket file descriptor for the control connection.
  *   address - The address string, passed as a pointer to this function, will
  *             be set to the IPv4 dot notation address on function return.
- *   service - The service string, passed as a pointer to this function, will
+ *      port - The service string, passed as a pointer to this function, will
  *             be set to the port integer value expressed as a string on
  *             function return.
- *    cmdStr - The string of the port command. "PORT h1,h2,h3,h4,p1,p2\n"
+ *       arg - The port command argument. "h1,h2,h3,h4,p1,p2\n"
  *
  * Return values:
  *   0    The hostname and service strings have been successfully set.
  *  -1    Error, hostname and service strings are not set.
  *****************************************************************************/
-int get_port_address (int csfd,
-		      char (*address)[INET_ADDRSTRLEN], 
-		      char (*service)[MAX_PORT_STR], 
-		      char *cmdStr)
+static int get_port_address (int csfd, char **addr, char **portStr, char *arg)
 {
   /* Used to collect each byte of the hostname and port that was passed to the
-   * function in the string argument 'cmdStr'.
+   * function in the string argument 'arg'.
    *
    * The bytes that will be collected from the command string and stored in the
    * elements of this array have been stored in a value that is larger than 8
@@ -531,7 +511,7 @@ int get_port_address (int csfd,
   uint16_t h[PORT_BYTE_ARGS];    // h1,h2,h3,h4,p1,p2 see the function header.
   int hindex;
 
-  int cmdStrLen;  // Length of the command string (function argument 4).
+  int argLen;     // Length of the command string (function argument 4).
   uint16_t port;  // Stores the combined p1 and p2 value.
   int i;          // Loop counter.
 
@@ -539,7 +519,7 @@ int get_port_address (int csfd,
 		    * between each byte field in the command string. */
   
   // Initialize counters and compare values.
-  cmdStrLen = strlen (cmdStr);
+  argLen = strlen (arg);
   charCounter = 0;
   hindex = 0;
   i = 0;
@@ -547,12 +527,12 @@ int get_port_address (int csfd,
   /* Process all characters in the command string. This includes the command
    * portion "PORT " and the argument portion "h1,h2,h3,h4,p1,p2\n". Check for
    * errors in the argument string. */
-  while (i < cmdStrLen) {
+  while (i < argLen) {
     /* Enter this block if the current character is not a digit. All characters
      * that are not digits (0-9) will be processed in this block, and the loop
      * will be restarted with the continue statement to process the next
      * character. */
-    if ((cmdStr[i] < 48) || (cmdStr[i] > 57)) {
+    if ((arg[i] < 48) || (arg[i] > 57)) {
       // Only one non-digit character may appear in one continuous sequence.
       if (charCounter == 1) {
 	fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
@@ -567,13 +547,13 @@ int get_port_address (int csfd,
 	send_mesg_501 (csfd);
       } else if (hindex < 6) {
 	// Only a comma may separate each byte field.
-	if (cmdStr[i] != ',') {
+	if (arg[i] != ',') {
 	  fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
 	  send_mesg_501 (csfd);
 	}
       } else {
 	// The last character must be a null terminator.
-	if (cmdStr[i] != '\0') {
+	if (arg[i] != '\0') {
 	  fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
 	  send_mesg_501 (csfd);
 	}
@@ -590,7 +570,7 @@ int get_port_address (int csfd,
 
     /* When an integer is found, store the integer. See acknowledgement ONE in
      * the file header for the meaning of "SCNu16". */
-    if (sscanf (cmdStr + i, "%"SCNu16, &h[hindex]) == -1) {
+    if (sscanf (arg + i, "%"SCNu16, &h[hindex]) == -1) {
       if (errno == EINTR) {
 	i--; // So that the same character will be passed to sscanf()
 	continue;
@@ -607,7 +587,7 @@ int get_port_address (int csfd,
       return -1;
     }
 
-    // Determine how many digits present in the integer.
+    // Determine how many digits are present in the integer.
     if (h[hindex] > 99) {
       i += 3;
     } else if (h[hindex] > 9) {
@@ -627,8 +607,8 @@ int get_port_address (int csfd,
     return -1;
   }
 
-  // Store the hostname in an IPv4 dot notation string. See acknowledgement ONE.
-  sprintf (*address, "%"PRIu16".%"PRIu16".%"PRIu16".%"PRIu16,
+  // Store the hostname in an IPv4 dot notation string..
+  sprintf (*addr, "%"PRIu16".%"PRIu16".%"PRIu16".%"PRIu16,
 	   h[0], h[1], h[2], h[3]);
 
   /* Multiply the value of the high order port byte by 256, to shift this byte
@@ -636,10 +616,10 @@ int get_port_address (int csfd,
   h[4] = (h[4] * 256);
   // Combine the two port bytes to create one integer.
   port = (h[4] | h[5]);
-  // Store the integer as a string. See acknowledgement ONE in the file header.
-  sprintf (*service, "%"PRIu16, port);
+  // Store the integer as a string.
+  sprintf (*portStr, "%"PRIu16, port);
 
-  // The hostname and service have been set, return from the function.
+  // The hostname and port have been set, return from the function.
   return 0;
 }
   

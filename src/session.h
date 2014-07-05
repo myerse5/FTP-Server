@@ -12,12 +12,14 @@
 #define __SESSION_H__
 
 
-#include <stdbool.h>  // Required for 'bool' in structure.
+#include <arpa/inet.h>  // Required for INETADDR_STRLEN in structure.
+#include <stdbool.h>    // Required for 'bool' in structure.
+                       
 
-
-// TODO update these random, arbitrary values.
-#define CMD_STRLEN 4096
-#define USER_STRLEN 64
+/* TODO: Remove these buffer overruns, tie them all together and define one
+ *       one (hopefully) constant in an appropriate place. */
+#define CMD_STRLEN   4096
+#define USER_STRLEN  64
 #define ABORT_STRLEN 5
 
 
@@ -32,9 +34,61 @@
 
 
 /******************************************************************************
+ * String size constants used for for a legal PORT argument. These values are
+ * used by the session_info_t structure found in 'session.h', and the functions
+ * found in 'net.c'.
+ *****************************************************************************/
+/* The maximum string length of the arguments to the PORT command.
+ * (6 three digit fields) + (5 commas) + (null terminator) */
+#define MAX_CMDPORT_ARG_STRLEN ((6*3) + 5 + 1)
+
+/* The minimum string length of the arguments to the PORT comman.
+ * (PORT + space) + (6 one digit fields) + (5 commas) + (newline + null) */
+#define MIN_CMDPORT_ARG_STRLEN ((6*1) + 5 + 1)
+
+/* The maximum length of a port integer when expressed as a string.
+ * (((2^16) - 1) = 65535) == (5 chars + 1 for the NULL terminator) == 6 chars */
+#define MAX_PORT_INT_STRLEN 6
+
+
+/******************************************************************************
+ * This structure holds the connection info that will be used to establish the
+ * next data connection with the client. When the data connection has been
+ * established, these variables must be set as follows:
+ *
+ *     hostname: The first character MUST be set to '\0'.
+ *         port: The first character MUST be set to '\0'.
+ *         pasv: MUST be set to 0.
+ *
+ * After a successful PASV command (the command is accepted), the structure
+ * variables must be set as follows:
+ *
+ *     hostname: Set to the dot-notation ip address sent in the PORT request.
+ *               e.g. "xxx.xxx.x.xxx"
+ *         port: Set to the integer port that was sent in the PORT request,
+ *               represented as a string. e.g. "22231"
+ *         pasv: MUST be set to 0.
+ *
+ * After a successful PASV command (the command is accepted), the structure
+ * variables must be set as follows:
+ *
+ *     hostname: The first character MUST be set to '\0'.
+ *         port: The first character MUST be set to '\0'.
+ *         pasv: Set to the socket file descriptor of the newly created
+ *               listening socket.
+ *****************************************************************************/
+typedef struct {
+  char hostname[INET_ADDRSTRLEN];
+  char port[MAX_PORT_INT_STRLEN];
+  int pasv;
+} conn_info_t;
+
+
+/******************************************************************************
  * The session info structure. Exactly one of these structures is created for
- * each control thread. It is created by the function session(), and a
- * pointer to this structure is passed as an argument to each command thread.
+ * each control thread, or in other words, for each connected client. It is
+ * created by the function session(), and a pointer to this structure is passed
+ * as an argument to each command thread.
  * 
  * This structure contains any socket information, the command and arguments
  * received with the command from the client, and other useful information that
@@ -44,18 +98,42 @@
  * A command thread and the command thread which created it communicate by
  * changing values in this structure (ie. control thread sets abort to true,
  * the command thread notices this change and terminates).
+ *
+ * session_info_t
+ *    |
+ *    |----cwd
+ *    |----user
+ *    |----loggedin
+ *    |----cmdComplete
+ *    |----cmdAbort
+ *    |----type
+ *    |----csfd
+ *    |----dsfd
+ *    |----connInfo
+ *            |
+ *            |----hostname
+ *            |----port
+ *            |----pasv
  *****************************************************************************/
 typedef struct {
-  int csfd;	        	// control socket, rx from main
-  int dsfd;		      	// data socket, created from command thread
-  char cwd[CMD_STRLEN];		// current working directory
-  char user[USER_STRLEN];	// username
-  bool loggedin;		// whether user is logged in
-  bool cmdComplete;		// command thread is complete
-  bool cmdAbort;		// command to abort
-  bool cmdQuit;	         	// command to quit has been given
-  char cmdString[CMD_STRLEN];	// command string for current command
-  char type;
+  char cwd[CMD_STRLEN];		// The current working directory.
+  char user[USER_STRLEN];	// The current username.
+  bool loggedin;		// True if the client has completed the login.
+  bool cmdComplete;		// True when the command thread is complete.
+  bool cmdAbort;		// True requests the command thread to abort.
+  char type;                    // The data connection transfer type.
+  int csfd;	        	// The control connection socket file descriptor
+  int dsfd;		      	// The data connection socket file descriptor.
+
+  /* Contains the service and hostname required to establish PORT connection,
+   * or a listening socket created with the PASV command. */
+  conn_info_t connInfo;
+
+  // A string containing the next command to process in this session.
+  char cmdString[CMD_STRLEN];	
+
+  // A request to clean up and return from the session has been given by main().
+  bool cmdQuit;	         	
 } session_info_t;
 
 
