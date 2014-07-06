@@ -34,6 +34,12 @@ int send_mesg_150 (int csfd, const char *filename, char option)
     reply = "150 Opening ASCII mode data connection for ";
   } else if (option == REPLY_150_BINARY) {
     reply = "150 Opening BINARY mode data connection for ";
+  } else if (option == REPLY_150_DIR) {
+    reply = "150 Here comes the directory listing.\n";
+    mesgLen = strlen (reply);
+    if (send_all (csfd, (uint8_t*)reply, mesgLen) == -1)
+      return -1;
+    return 0;
   }
 
   mesgLen = strlen (reply);

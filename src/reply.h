@@ -30,6 +30,7 @@
 
 #define REPLY_150_ASCII   'a'
 #define REPLY_150_BINARY  'b'
+#define REPLY_150_DIR     'd'
 
 #define REPLY_200_PORT    'p'
 #define REPLY_200_ASCII   'a'

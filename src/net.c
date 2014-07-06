@@ -52,8 +52,7 @@
  * Local function prototypes.
  *****************************************************************************/
 static int get_pasv_sock (const char *address, const char *port);
-static int port_connect (char *hostname, char *service);
-static int get_port_address (int csfd, char **addr, char **portStr, char *arg);
+static int get_port_address (char **addr, char **portStr, char *arg);
 
 /******************************************************************************
  * get_control_sock - see net.h
@@ -240,6 +239,7 @@ int cmd_pasv (session_info_t *si)
   char interfaceAddr[INET_ADDRSTRLEN];
 
   int csfd = si->csfd;
+  int lsfd;        // Listening socket file descriptor.
 
   // Ensure the client has logged in.
   if (!si->loggedin) {
@@ -247,6 +247,8 @@ int cmd_pasv (session_info_t *si)
     return -1;
   }
 
+  // TODO: This block may be out of date and may potentially be removed.
+  // TODO: Replace with the PORT or PASV artifact block found below potentially.
   /* The server "MUST" close the data connection port when:
    * "The port specification is changed by a command from the user".
    * Source: RFC 959 page 19 */
@@ -254,6 +256,15 @@ int cmd_pasv (session_info_t *si)
     if (close (si->dsfd) == -1)
       fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
     si->dsfd = 0;
+  }
+
+  // Reset any previous PORT or PASV artifacts.
+  si->connInfo.hostname[0] = '\0';
+  si->connInfo.port[0] = '\0';
+  if (si->connInfo.pasv != 0) {
+    if (close (si->connInfo.pasv) == -1)
+      fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
+    si->connInfo.pasv = 0;
   }
 
   // Read the config file to find which interface to use to make the socket.
@@ -272,24 +283,15 @@ int cmd_pasv (session_info_t *si)
 
 
   // Create a socket that will listen for a data connection from a client.
-  if ((si->dsfd = get_pasv_sock (interfaceAddr, NULL)) == -1) {
+  if ((lsfd = get_pasv_sock (interfaceAddr, NULL)) == -1) {
     return -1;
   }
 
   // Send the data connection address information to the control socket.
-  if (send_mesg_227 (csfd, si->dsfd) == -1) {
-    close (si->dsfd);
-    si->dsfd = 0;
-    return -1;
-  }
- 
-  // Accept a connection from the client on the listening socket.
-  if ((si->dsfd = accept_connection (si->dsfd, ACCEPT_PASV, si)) == -1) {
-  si->dsfd = 0;
-  return -1;
-  }
+  send_mesg_227 (csfd, lsfd);
+  si->connInfo.pasv = lsfd;
 
-  return si->dsfd;
+  return lsfd;
 }
 
 
@@ -447,6 +449,15 @@ int cmd_port (session_info_t *si, char *arg)
     si->dsfd = 0;
   }
 
+  // Reset any previous PORT or PASV artifacts.
+  si->connInfo.hostname[0] = '\0';
+  si->connInfo.port[0] = '\0';
+  if (si->connInfo.pasv != 0) {
+    if (close (si->connInfo.pasv) == -1)
+      fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
+    si->connInfo.pasv = 0;
+  }
+
   /* Filter invalid PORT arguments by comparing the length of the argument. Too
    * many or too little number of characters in the string means that the
    * argument is invalid. */
@@ -461,20 +472,13 @@ int cmd_port (session_info_t *si, char *arg)
   }
 
   // Convert the address h1,h2,h3,h4,p1,p2 into a hostname and port.
-  if (get_port_address (csfd, &hostname, &port, arg) == -1) {
+  if (get_port_address (&hostname, &port, arg) == -1) {
+    send_mesg_501 (csfd);
     return -1;
   }
 
-  // TODO: This section will go around the 426 message in transfer commands
-  //       INSTEAD of this current location.
-  // Establish the data connection to the hostname and service.
-  if ((si->dsfd = port_connect (hostname, port)) == -1) {
-    return -1;
-  }
   send_mesg_200 (csfd, REPLY_200_PORT);
-  
-  // TODO: si->dsfd may NOT be set by this function.
-  return si->dsfd;
+  return 0;
 }
 
 
@@ -487,7 +491,6 @@ int cmd_port (session_info_t *si, char *arg)
  * order bytes of the 16bit integer port.
  *
  * Arguments:
- *      csfd - The socket file descriptor for the control connection.
  *   address - The address string, passed as a pointer to this function, will
  *             be set to the IPv4 dot notation address on function return.
  *      port - The service string, passed as a pointer to this function, will
@@ -499,7 +502,7 @@ int cmd_port (session_info_t *si, char *arg)
  *   0    The hostname and service strings have been successfully set.
  *  -1    Error, hostname and service strings are not set.
  *****************************************************************************/
-static int get_port_address (int csfd, char **addr, char **portStr, char *arg)
+static int get_port_address (char **addr, char **portStr, char *arg)
 {
   /* Used to collect each byte of the hostname and port that was passed to the
    * function in the string argument 'arg'.
@@ -536,7 +539,6 @@ static int get_port_address (int csfd, char **addr, char **portStr, char *arg)
       // Only one non-digit character may appear in one continuous sequence.
       if (charCounter == 1) {
 	fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
-	send_mesg_501 (csfd);
 	return -1;
       }
 
@@ -544,18 +546,15 @@ static int get_port_address (int csfd, char **addr, char **portStr, char *arg)
       if (hindex == 0) {
 	// The argument string must begin with an integer.
 	fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
-	send_mesg_501 (csfd);
       } else if (hindex < 6) {
 	// Only a comma may separate each byte field.
 	if (arg[i] != ',') {
 	  fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
-	  send_mesg_501 (csfd);
 	}
       } else {
 	// The last character must be a null terminator.
 	if (arg[i] != '\0') {
 	  fprintf (stderr, "%s: illegal character in argument\n", __FUNCTION__);
-	  send_mesg_501 (csfd);
 	}
       }
       // Increment counts on every character read.
@@ -583,7 +582,6 @@ static int get_port_address (int csfd, char **addr, char **portStr, char *arg)
     if (h[hindex] > MAX_8_BIT) {
       fprintf (stderr, "%s: invalid PORT argument, %"PRIu16" is larger than"
 	       " a byte\n", __FUNCTION__, h[hindex]);
-      send_mesg_501 (csfd);
       return -1;
     }
 
@@ -603,7 +601,6 @@ static int get_port_address (int csfd, char **addr, char **portStr, char *arg)
   // Ensure that the correct number of integers were present in the string.
   if (hindex < (PORT_BYTE_ARGS - 1)) {
     fprintf (stderr, "%s: improper PORT argument\n", __FUNCTION__);
-    send_mesg_501 (csfd);
     return -1;
   }
 

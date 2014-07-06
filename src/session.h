@@ -56,8 +56,8 @@
  * next data connection with the client. When the data connection has been
  * established, these variables must be set as follows:
  *
- *     hostname: The first character MUST be set to '\0'.
- *         port: The first character MUST be set to '\0'.
+ *     hostname: The first character MUST be set to a NULL character.
+ *         port: The first character MUST be set to a NULL character.
  *         pasv: MUST be set to 0.
  *
  * After a successful PASV command (the command is accepted), the structure
@@ -72,8 +72,8 @@
  * After a successful PASV command (the command is accepted), the structure
  * variables must be set as follows:
  *
- *     hostname: The first character MUST be set to '\0'.
- *         port: The first character MUST be set to '\0'.
+ *     hostname: The first character MUST be set to a NULL character.
+ *         port: The first character MUST be set to a NULL character.
  *         pasv: Set to the socket file descriptor of the newly created
  *               listening socket.
  *****************************************************************************/

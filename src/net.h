@@ -19,23 +19,6 @@
 #include "session.h"   // required for 'session_info_t' in function prototype
 
 
-/******************************************************************************
- * String size constants used for for a legal PORT argument. These values are
- * used by the session_info_t structure found in 'session.h', and the functions
- * found in 'net.c'.
- *****************************************************************************/
-/* The maximum string length of the arguments to the PORT command.
- * (6 three digit fields) + (5 commas) + (null terminator) */
-//#define MAX_CMDPORT_ARG_STRLEN ((6*3) + 5 + 1)
-
-/* The minimum string length of the arguments to the PORT comman.
- * (PORT + space) + (6 one digit fields) + (5 commas) + (newline + null) */
-//#define MIN_CMDPORT_ARG_STRLEN ((6*1) + 5 + 1)
-
-/* The maximum length of a port integer when expressed as a string.
- * (((2^16) - 1) = 65535) == (5 chars + 1 for the NULL terminator) == 6 chars */
-//#define MAX_PORT_INT_STRLEN 6
-
 // The number of bits in a byte.
 #define BITS_IN_BYTE 8
 
@@ -133,8 +116,9 @@ int accept_connection (int sfd, int mode, session_info_t *si);
  * for the INTERFACE_CONFIG setting in the configuration file.
  *
  * Send the address information of the newly created socket to the client over
- * the control connection. This function will accept() a data connection from
- * the client before returning.
+ * the control connection. The newly created listening socket file descriptor
+ * will be stored in the session_info_t structure when the function does not
+ * return error.
  *
  * Arguments:
  *   si - Contains the session information of the control thread.
@@ -169,18 +153,34 @@ int get_interface_address (const char *interface,
 
 
 /******************************************************************************
- * Connect a TCP socket to the address argument of the PORT command. This
- * will create a data connection to the client if successful.
+ * Filter the PORT command argument, storing the connection information in the
+ * session_info_t structure if the argument is accepted.
  *
  * Arguments:
  *    si  - Contains the session information of the control thread.
- *   arg  - The port argument string "h1,h2,h3,h4,p1,p2\n"
+ *   arg  - The port argument string "h1,h2,h3,h4,p1,p2"
  *
  * Return values:
- *   >0   The socket file descriptor of the data connection socket.
- *   -1   Error, the data connection could not be created.
+ *    0   The PORT command was accepted.
+ *   -1   The PORT command was rejected.
  *****************************************************************************/
 int cmd_port (session_info_t *si, char *arg);
+
+
+/******************************************************************************
+ * Connect to the address and port specified in the arguments received with the
+ * PORT command.
+ *
+ * Arguments:
+ *   hostname - The IPv4 address to connect to, represented in a dot notation
+ *              string. (eg. "127.0.1.1")
+ *       port - The port to connect to, represented as a string. (eg. "56035")
+ *
+ * Return values:
+ *   >0    The socket file descriptor of the newly created data connection.
+ *   -1    Error, the connection could not be made.
+ *****************************************************************************/
+int port_connect (char *hostname, char *port);
 
 
 /******************************************************************************

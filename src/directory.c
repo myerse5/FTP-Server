@@ -36,7 +36,7 @@ static int detail_list (struct dirent *dirInfo, char *fullpath, char **output);
 extern char *rootdir; // The root directory of the server, defined in 'main.c'.
 
 
-// TODO: integrate into standard buffer size with an actual error check involved.
+// TODO: integrate into standard buffer size with an actual error check involved
 char fileBuff[MAX_FDATSZ];
 
 
@@ -46,8 +46,12 @@ char fileBuff[MAX_FDATSZ];
 void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
 {
   char *fullpath;
-  char *transferStart;
+  int dsfd;
   int csfd = si->csfd;
+
+  char *hostname = si->connInfo.hostname;
+  char *port = si->connInfo.port;
+  int *pasv = &(si->connInfo.pasv);
   
   if (!si->loggedin) {
     send_mesg_530 (csfd, REPLY_530_REQUEST);
@@ -56,17 +60,34 @@ void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
   
   // Determine if the file is a directory.
   if (!check_dir_exist (si->cwd, arg)) {
-    send_mesg_553 (csfd);
+    send_mesg_550_no_dir (csfd);
     return;
   }
-  
-  transferStart = "150 Here comes the directory listing.\n";
-  send_all (csfd, (uint8_t*)transferStart, strlen (transferStart));
 
-  if (si->dsfd == 0) {
+  printf ("host = %s\nport = %s\n", hostname, port);
+  send_mesg_150 (csfd, NULL, REPLY_150_DIR);
+
+  // Establish the data connection.
+  if (si->connInfo.pasv > 0) {
+    if ((dsfd = accept_connection (*pasv, ACCEPT_PASV, si)) == -1) {
+      if (close (*pasv) == -1)
+	fprintf (stderr, "%s: close: %s\n", __FUNCTION__, strerror (errno));
+      *pasv = 0;
+      send_mesg_425 (csfd);
+      return;
+    }
+  } else if (strlen (si->connInfo.hostname) > 0) {
+    if ((dsfd = port_connect (hostname, port)) == -1) {
+      *hostname = '\0';
+      *port = '\0';
+      send_mesg_425 (csfd);
+      return;
+    }
+  } else {
     send_mesg_425 (csfd);
     return;
   }
+  si->dsfd = dsfd;
 
   // Create a single pathname to the directory from the pathname fragments.
   if ((fullpath = merge_paths (si->cwd, arg, NULL)) == NULL) {
@@ -77,7 +98,17 @@ void cmd_list_nlst (session_info_t *si, char *arg, bool detail)
   }
 
   list_directory (si, fullpath, detail);
+  send_mesg_226 (csfd, REPLY_226_SUCCESS);
+  
   free (fullpath);
+  
+  *hostname = '\0';
+  *port = '\0';
+  *pasv = 0;
+  close (si->dsfd);
+  si->dsfd = 0;
+
+  printf ("return from nlst/list\n");
   return;
 }
 
@@ -172,16 +203,12 @@ static void list_directory (session_info_t *si, char * fullpath, bool detail)
   if (si->cmdAbort == true) {
     send_mesg_426 (csfd);
     si->cmdAbort = false;
-  } else {
-    send_mesg_226 (csfd, REPLY_226_SUCCESS);
   }
 
   // Clean up before returning.
   if (closedir (dp) == -1)
     fprintf (stderr, "%s: closedir: %s\n", __FUNCTION__, strerror (errno));
 
-  close (si->dsfd);
-  si->dsfd = 0;
   return;
 }
 
