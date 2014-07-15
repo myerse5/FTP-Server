@@ -85,28 +85,6 @@ char *rootdir;
  *   - 
  *****************************************************************************/
 
-/******************************************************************************
- * Clean up weird strings and whatnot. TODO
- *     FILE --- FUNCTION ---- First offending variable declaration.
- *    - net.c, cmd_port(), char *portsuccess.
- *    - directory.c, makeDir(), char * printStart.
- *    - help.c, command_help(), int strLength. ENDIF comments
- *    - transfer.c, perm_neg_check(), char * permdeny.
- *    - session.c, session(), char * abort.
- *    - directory.h, #includes, determine if there are ones that aren't required
- *    - help.c, command_HELP(), is the return value checked, should it be, or
- *      should the return be void.
- *****************************************************************************/
-
-/******************************************************************************
- * Other TODO's:
- *
- *   - Return an error for when [net.c] send_all() fails. Handle this error.
- *   - Test/check the includes in "directory.h". errno.h, stdlib.h, stdio.h... 
- *   - Find errors which the server can recover from, currently most failures
- *     result in the server shutting down. Admittedly most of these errors are
- *     pretty fatal, but this should be looked into.
- *****************************************************************************/
 
 /******************************************************************************
  * main
