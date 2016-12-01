@@ -1,6 +1,6 @@
 FTP-Server
 ==========
-A multithreaded FTP server built for UNIX systems using Berkley sockets API. Allowing global access to this server is not recommended at this time.
+A multithreaded FTP server built for Linux systems using Berkley sockets API. Allowing global access to this server is not recommended at this time.
 
 
 How To Install
